@@ -101,3 +101,38 @@ func (s *MemoService) Create(memoReq *MemoRequest) (*MemoCreateResponse, *http.R
 	}
 	return &res, resp, err
 }
+
+func (s *MemoService) Get(memoID string) (*MemoCreateResponse, *http.Response, error) {
+	u, err := url.Parse(fmt.Sprintf("%s/posts/%s", s.client.BaseURL, memoID))
+
+	//	TODO: return if not have scope permission
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	req, err := http.NewRequest("GET", u.String(), nil)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("X-DocBaseToken", s.client.AccessToken)
+
+	resp, err := s.client.Client.Do(req)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	dec := json.NewDecoder(resp.Body)
+
+	var res MemoCreateResponse
+	err = dec.Decode(&res)
+	if err != nil {
+		return nil, nil, err
+	}
+	return &res, resp, err
+
+}
