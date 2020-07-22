@@ -1,0 +1,77 @@
+{
+  "posts": [
+    {
+      "id": 4,
+      "title": "メモのタイトル4",
+      "body": "メモの本文4",
+      "draft": false,
+      "archived": false,
+      "url": "https://kray.docbase.io/posts/4",
+      "created_at": "2016-04-15T18:19:03+09:00",
+      "scope": "everyone",
+      "sharing_url": "https://docbase.io/posts/1/sharing/abcdefgh-0e81-4567-9876-1234567890ab",
+      "tags": [
+        { "name": "日報"}
+      ],
+      "user": {
+        "id": 3,
+        "name": "user3",
+        "profile_image_url": "https://image.docbase.io/uploads/aaa.gif"
+      },
+      "stars_count": 1,
+      "good_jobs_count": 2,
+      "comments": [
+        {
+          "id": 7,
+          "body": "コメント本文",
+          "created_at": "2016-05-13T17:07:18+09:00",
+          "user": {
+            "id": 2,
+            "name": "user2",
+            "profile_image_url": "https://image.docbase.io/uploads/aaa.gif"
+          }
+        }
+      ],
+      "groups": []
+    },
+    {
+      "id": 5,
+      "title": "メモのタイトル5",
+      "body": "メモの本文5",
+      "draft": false,
+      "archived": false,
+      "url": "https://kray.docbase.io/posts/5",
+      "created_at": "2016-04-15T18:19:03+09:00",
+      "scope": "everyone",
+      "sharing_url": "https://docbase.io/posts/1/sharing/abcdefgh-0e81-4567-9876-1234567890ab",
+      "tags": [
+        { "name": "日報"}
+      ],
+      "user": {
+        "id": 3,
+        "name": "user3",
+        "profile_image_url": "https://image.docbase.io/uploads/aaa.gif"
+      },
+      "stars_count": 1,
+      "good_jobs_count": 2,
+      "comments": [
+        {
+          "id": 7,
+          "body": "コメント本文",
+          "created_at": "2016-05-13T17:07:18+09:00",
+          "user": {
+            "id": 2,
+            "name": "user2",
+            "profile_image_url": "https://image.docbase.io/uploads/aaa.gif"
+          }
+        }
+      ],
+      "groups": []
+    }
+  ],
+  "meta": {
+    "previous_page": null,
+    "next_page": "https://api.docbase.io/teams/kray/posts?page=2&per_page=20",
+    "total": 39
+  }
+}
