@@ -1,0 +1,40 @@
+[
+  {
+    "id": 1,
+    "name": "ドックベースマン",
+    "username": "docbaseman",
+    "profile_image_url": "https://image.docbase.io/uploads/aaa.gif",
+    "role": "owner",
+    "posts_count": 2,
+    "last_access_time": "2020-03-27T09:25:09+09:00",
+    "two_step_authentication": false,
+    "groups": [
+      {
+        "id": 1,
+        "name": "グループ1"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "ドックベースウーマン",
+    "username": "docbasewoman",
+    "profile_image_url": "https://image.docbase.io/uploads/aaa.gif",
+    "role": "admin",
+    "posts_count": 3,
+    "last_access_time": "2020-03-27T09:25:09+09:00",
+    "two_step_authentication": false,
+    "groups": []
+  },
+  {
+    "id": 3,
+    "name": "ドックべーサー",
+    "username": "docbaser",
+    "profile_image_url": "https://image.docbase.io/uploads/aaa.gif",
+    "role": "user",
+    "posts_count": 5,
+    "last_access_time": "2020-03-27T09:25:09+09:00",
+    "two_step_authentication": false,
+    "groups": []
+  }
+]

@@ -1,8 +1,6 @@
 package docbase
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -63,7 +61,7 @@ type MemoCreateResponse struct {
 }
 
 func (s *MemoService) Create(memoReq *MemoRequest) (*MemoCreateResponse, *http.Response, error) {
-	u, err := url.Parse(fmt.Sprintf("%s/posts", s.client.BaseURL))
+	u, err := url.Parse("/posts")
 
 	//	TODO: return if not have scope permission
 
@@ -71,39 +69,24 @@ func (s *MemoService) Create(memoReq *MemoRequest) (*MemoCreateResponse, *http.R
 		return nil, nil, err
 	}
 
-	buf, err := json.Marshal(memoReq)
+	req, err := s.client.NewRequest("POST", u.String(), memoReq)
 
 	if err != nil {
 		return nil, nil, err
 	}
-
-	req, err := http.NewRequest("POST", u.String(), bytes.NewBuffer(buf))
-
-	if err != nil {
-		return nil, nil, err
-	}
-
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("X-DocBaseToken", s.client.AccessToken)
-
-	resp, err := s.client.Client.Do(req)
-
-	if err != nil {
-		return nil, nil, err
-	}
-
-	dec := json.NewDecoder(resp.Body)
 
 	var res MemoCreateResponse
-	err = dec.Decode(&res)
+	resp, err := s.client.Do(req, res)
+
 	if err != nil {
 		return nil, nil, err
 	}
+
 	return &res, resp, err
 }
 
 func (s *MemoService) Get(memoID string) (*MemoCreateResponse, *http.Response, error) {
-	u, err := url.Parse(fmt.Sprintf("%s/posts/%s", s.client.BaseURL, memoID))
+	u, err := url.Parse(fmt.Sprintf("/posts/%s", memoID))
 
 	//	TODO: return if not have scope permission
 
@@ -111,28 +94,18 @@ func (s *MemoService) Get(memoID string) (*MemoCreateResponse, *http.Response, e
 		return nil, nil, err
 	}
 
-	req, err := http.NewRequest("GET", u.String(), nil)
+	req, err := s.client.NewRequest("GET", u.String(), nil)
 
 	if err != nil {
 		return nil, nil, err
 	}
 
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("X-DocBaseToken", s.client.AccessToken)
-
+	var res MemoCreateResponse
 	resp, err := s.client.Client.Do(req)
 
 	if err != nil {
 		return nil, nil, err
 	}
 
-	dec := json.NewDecoder(resp.Body)
-
-	var res MemoCreateResponse
-	err = dec.Decode(&res)
-	if err != nil {
-		return nil, nil, err
-	}
 	return &res, resp, err
-
 }
