@@ -120,12 +120,12 @@ func (s *MemoService) Get(memoID string) (*Memo, *http.Response, error) {
 		return nil, nil, err
 	}
 
-	var res Memo
-	resp, err := s.client.Do(req, res)
+	mResp := &Memo{}
+	resp, err := s.client.Do(req, mResp)
 
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return &res, resp, err
+	return mResp, resp, err
 }

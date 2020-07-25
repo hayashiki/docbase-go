@@ -5,7 +5,6 @@ import (
 	"github.com/hayashiki/docbase-go/testutil"
 	"log"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
 	"reflect"
 	"strconv"
@@ -85,24 +84,56 @@ func TestMemoService_Create(t *testing.T) {
 }
 
 func TestMemoService_Get(t *testing.T) {
-	mux = http.NewServeMux()
-	server = httptest.NewServer(mux)
-	defer server.Close()
 
-	url, _ := url.Parse(server.URL)
+	setup()
+	defer teardown()
 
-	cli := NewClient(nil, "dummyTeam", "dummyToken", OptionDocbaseURL(url))
-	log.Printf("url is %v", url)
-	//client.BaseURL = url
-	//log.Printf("url2 is %v", url)
+	ti, err := time.Parse(time.RFC3339, "2020-03-27T09:25:09+09:00")
 
-	memo := Memo{
-		ID: 1,
-		Title: "hoge",
+	if err != nil {
+		t.Errorf("Fail to parse err: %v", err)
 	}
-	log.Printf("memoid %v", strconv.Itoa(memo.ID))
 
-	memoSvc := NewMemoService(cli)
+	memo := &Memo{
+		ID:         1,
+		Title:      "メモのタイトル",
+		Body:       "メモの本文",
+		Draft:      false,
+		Archived:   false,
+		URL:        "https://kray.docbase.io/posts/1",
+		CreatedAt:  ti,
+		Tags:       []MemoTag{
+			MemoTag{Name: "rails"},
+			MemoTag{Name: "ruby"},
+		},
+		Scope:      "group",
+		SharingURL: "https://docbase.io/posts/1/sharing/abcdefgh-0e81-4567-9876-1234567890ab",
+		User: MemoUser{
+			ID:              1,
+			Name:            "danny",
+			ProfileImageURL: "https://image.docbase.io/uploads/aaa.gif",
+		},
+		StarsCount:    1,
+		GoodJobsCount: 2,
+		Comments:      []MemoComment{},
+		Groups:        []MemoGroup{
+			MemoGroup{
+				ID: 1,
+				Name: "DocBase",
+			},
+		},
+		Attachments:   []MemoAttachment{MemoAttachment{
+			ID:        "461d38b9-8c22-4222-a6a2-a6f2ce98ec3a.csv",
+			Name:      "uploadfile.csv",
+			Size:      18786,
+			URL:       "https://kray.docbase.io/file_attachments/461d38b9-8c22-4222-a6a2-a6f2ce98ec3a.csv",
+			Markdown:  "[![csv](/images/file_icons/csv.svg) uploadfile.jpg](https://kray.docbase.io/uploads/461d38b9-8c22-4222-a6a2-a6f2ce98ec3a.csv)",
+			CreatedAt: ti,
+		},
+		},
+	}
+
+	memoSvc := NewMemoService(client)
 
 	mux.HandleFunc(fmt.Sprintf("/posts/%d", memo.ID), func(w http.ResponseWriter, r *http.Request) {
 		//requestSent = true
@@ -126,6 +157,5 @@ func TestMemoService_Get(t *testing.T) {
 	if !reflect.DeepEqual(getRes, memo) {
 		t.Errorf("Get returned %+v, want %+v", getRes, memo)
 	}
-
 }
 
