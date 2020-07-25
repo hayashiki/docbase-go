@@ -2,8 +2,29 @@ package docbase
 
 import (
 	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
 	"testing"
 )
+
+var (
+	mux *http.ServeMux
+	server *httptest.Server
+	client *Client
+)
+
+func setup() {
+	mux = http.NewServeMux()
+	server = httptest.NewServer(mux)
+	url, _ := url.Parse(server.URL)
+
+	client = NewClient(nil, "dummyTeam", "dummyToken", OptionDocbaseURL(url))
+}
+
+func teardown() {
+	defer server.Close()
+}
 
 func TestNewClient(t *testing.T) {
 	cli := NewClient(nil, "fakeTeam", "fakeToken")

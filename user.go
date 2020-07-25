@@ -73,3 +73,4 @@ func (s *UserService) List(opts *UserListOptions) (*[]User, *http.Response, erro
 
 	return userResp, resp, err
 }
+

@@ -25,7 +25,7 @@ type Service struct {
 	client *Client
 }
 
-func NewClient(httpClient *http.Client, team, token string) *Client {
+func NewClient(httpClient *http.Client, team, token string, opts ...Option) *Client {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
@@ -37,17 +37,35 @@ func NewClient(httpClient *http.Client, team, token string) *Client {
 	}
 
 	cli := &Client{
-		BaseURL:     baseURL,
 		AccessToken: token,
 		Team:        team,
 		Client:      httpClient,
 	}
 
+	for _, opt := range opts {
+		opt(cli)
+	}
+
+	if cli.BaseURL == nil {
+		cli.BaseURL = baseURL
+	}
+
 	return cli
 }
 
+type Option func(client *Client)
+
+func OptionDocbaseURL(url *url.URL) Option {
+	return func(client *Client) {
+		client.BaseURL = url
+	}
+}
+
 func (c *Client) NewRequest(method, path string, body interface{}) (*http.Request, error) {
-	u, err := url.Parse(fmt.Sprintf("%s/%s", c.BaseURL.String(), path))
+
+	u, err := url.Parse(fmt.Sprintf("%s%s", c.BaseURL.String(), path))
+
+	log.Printf("New req %s", u.String())
 
 	if err != nil {
 		return nil, err

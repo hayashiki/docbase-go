@@ -2,6 +2,7 @@ package docbase
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -25,7 +26,7 @@ type MemoRequest struct {
 	Groups []string
 }
 
-type MemoCreateResponse struct {
+type Memo struct {
 	ID        int       `json:"id"`
 	Title     string    `json:"title"`
 	Body      string    `json:"body"`
@@ -33,34 +34,49 @@ type MemoCreateResponse struct {
 	Archived  bool      `json:"archived"`
 	URL       string    `json:"url"`
 	CreatedAt time.Time `json:"created_at"`
-	Tags      []struct {
-		Name string `json:"name"`
-	} `json:"tags"`
+	Tags      []MemoTag `json:"tags"`
 	Scope      string `json:"scope"`
 	SharingURL string `json:"sharing_url"`
-	User       struct {
-		ID              int    `json:"id"`
-		Name            string `json:"name"`
-		ProfileImageURL string `json:"profile_image_url"`
-	} `json:"user"`
+	User       MemoUser `json:"user"`
 	StarsCount    int           `json:"stars_count"`
 	GoodJobsCount int           `json:"good_jobs_count"`
-	Comments      []interface{} `json:"comments"`
-	Groups        []struct {
-		ID   int    `json:"id"`
-		Name string `json:"name"`
-	} `json:"groups"`
-	Attachments []struct {
-		ID        string    `json:"id"`
-		Name      string    `json:"name"`
-		Size      int       `json:"size"`
-		URL       string    `json:"url"`
-		Markdown  string    `json:"markdown"`
-		CreatedAt time.Time `json:"created_at"`
-	} `json:"attachments"`
+	Comments      []MemoComment `json:"comments"`
+	Groups        []MemoGroup `json:"groups"`
+	Attachments []MemoAttachment `json:"attachments"`
 }
 
-func (s *MemoService) Create(memoReq *MemoRequest) (*MemoCreateResponse, *http.Response, error) {
+type MemoComment struct {
+	ID int
+	Body string
+	CreatedAt time.Time `json:"created_at"`
+	MemoUser
+}
+
+type MemoTag struct {
+	Name string `json:"name"`
+}
+
+type MemoUser struct {
+	ID              int    `json:"id"`
+	Name            string `json:"name"`
+	ProfileImageURL string `json:"profile_image_url"`
+}
+
+type MemoGroup struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+type MemoAttachment struct {
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	Size      int       `json:"size"`
+	URL       string    `json:"url"`
+	Markdown  string    `json:"markdown"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+func (s *MemoService) Create(memoReq *MemoRequest) (*Memo, *http.Response, error) {
 	u, err := url.Parse("/posts")
 
 	//	TODO: return if not have scope permission
@@ -75,17 +91,21 @@ func (s *MemoService) Create(memoReq *MemoRequest) (*MemoCreateResponse, *http.R
 		return nil, nil, err
 	}
 
-	var res MemoCreateResponse
-	resp, err := s.client.Do(req, res)
+	mResp := &Memo{}
+	resp, err := s.client.Do(req, mResp)
 
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return &res, resp, err
+	log.Printf("res is %v", mResp )
+	log.Printf("res is %v", err )
+
+	return mResp, resp, err
 }
 
-func (s *MemoService) Get(memoID string) (*MemoCreateResponse, *http.Response, error) {
+func (s *MemoService) Get(memoID string) (*Memo, *http.Response, error) {
+
 	u, err := url.Parse(fmt.Sprintf("/posts/%s", memoID))
 
 	//	TODO: return if not have scope permission
@@ -100,8 +120,8 @@ func (s *MemoService) Get(memoID string) (*MemoCreateResponse, *http.Response, e
 		return nil, nil, err
 	}
 
-	var res MemoCreateResponse
-	resp, err := s.client.Client.Do(req)
+	var res Memo
+	resp, err := s.client.Do(req, res)
 
 	if err != nil {
 		return nil, nil, err

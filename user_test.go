@@ -4,23 +4,16 @@ import (
 	"fmt"
 	"github.com/hayashiki/docbase-go/testutil"
 	"net/http"
-	"net/http/httptest"
-	"net/url"
 	"reflect"
 	"testing"
 	"time"
 )
 
 func TestUserService_List(t *testing.T) {
+	setup()
+	defer teardown()
 
-	mux = http.NewServeMux()
-	server = httptest.NewServer(mux)
-	defer server.Close()
-
-	url, _ := url.Parse(server.URL)
-	cli := NewClient(nil, "dummyTeam", "dummyToken", OptionDocbaseURL(url))
-
-	userSvc := NewUserService(cli)
+	userSvc := NewUserService(client)
 
 	mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, testutil.LoadFixture(t, "user-list-response.json"))
@@ -28,7 +21,9 @@ func TestUserService_List(t *testing.T) {
 
 	ti, err := time.Parse(time.RFC3339, "2020-03-27T09:25:09+09:00")
 
-	t.Errorf("Fail to parse err: %v", err)
+	if err != nil {
+		t.Errorf("Fail to parse err: %v", err)
+	}
 
 	user1 := &User{
 		ID:                    1,
