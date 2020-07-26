@@ -15,16 +15,14 @@ func NewAttachmentService(client *Client) *AttachmentService {
 	return &AttachmentService{client: client}
 }
 
-
 type Attachment struct {
-
 }
 
 type Request struct {
 	ID string
 }
 
-func (s AttachmentService) Download(attachmentID string) ([]byte, error){
+func (s AttachmentService) Download(attachmentID string) ([]byte, error) {
 	u, err := url.Parse(fmt.Sprintf("%s/attachments/%s", s.client.BaseURL, attachmentID))
 
 	if err != nil {
