@@ -2,7 +2,6 @@ package docbase
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -27,27 +26,27 @@ type MemoRequest struct {
 }
 
 type Memo struct {
-	ID        int       `json:"id"`
-	Title     string    `json:"title"`
-	Body      string    `json:"body"`
-	Draft     bool      `json:"draft"`
-	Archived  bool      `json:"archived"`
-	URL       string    `json:"url"`
-	CreatedAt time.Time `json:"created_at"`
-	Tags      []MemoTag `json:"tags"`
-	Scope      string `json:"scope"`
-	SharingURL string `json:"sharing_url"`
-	User       MemoUser `json:"user"`
-	StarsCount    int           `json:"stars_count"`
-	GoodJobsCount int           `json:"good_jobs_count"`
-	Comments      []MemoComment `json:"comments"`
-	Groups        []MemoGroup `json:"groups"`
-	Attachments []MemoAttachment `json:"attachments"`
+	ID            int              `json:"id"`
+	Title         string           `json:"title"`
+	Body          string           `json:"body"`
+	Draft         bool             `json:"draft"`
+	Archived      bool             `json:"archived"`
+	URL           string           `json:"url"`
+	CreatedAt     time.Time        `json:"created_at"`
+	Tags          []MemoTag        `json:"tags"`
+	Scope         string           `json:"scope"`
+	SharingURL    string           `json:"sharing_url"`
+	User          MemoUser         `json:"user"`
+	StarsCount    int              `json:"stars_count"`
+	GoodJobsCount int              `json:"good_jobs_count"`
+	Comments      []MemoComment    `json:"comments"`
+	Groups        []MemoGroup      `json:"groups"`
+	Attachments   []MemoAttachment `json:"attachments"`
 }
 
 type MemoComment struct {
-	ID int
-	Body string
+	ID        int
+	Body      string
 	CreatedAt time.Time `json:"created_at"`
 	MemoUser
 }
@@ -98,15 +97,12 @@ func (s *MemoService) Create(memoReq *MemoRequest) (*Memo, *http.Response, error
 		return nil, nil, err
 	}
 
-	log.Printf("res is %v", mResp )
-	log.Printf("res is %v", err )
-
 	return mResp, resp, err
 }
 
-func (s *MemoService) Get(memoID string) (*Memo, *http.Response, error) {
+func (s *MemoService) Get(memoID int) (*Memo, *http.Response, error) {
 
-	u, err := url.Parse(fmt.Sprintf("/posts/%s", memoID))
+	u, err := url.Parse(fmt.Sprintf("/posts/%d", memoID))
 
 	//	TODO: return if not have scope permission
 
@@ -120,12 +116,55 @@ func (s *MemoService) Get(memoID string) (*Memo, *http.Response, error) {
 		return nil, nil, err
 	}
 
-	var res Memo
-	resp, err := s.client.Do(req, res)
+	mResp := &Memo{}
+	resp, err := s.client.Do(req, mResp)
 
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return &res, resp, err
+	return mResp, resp, err
+}
+
+type SuccessResponse struct {
+	Success bool `json:"success"`
+}
+
+func (s *MemoService) Update(memoID int, memoReq *MemoRequest) (*Memo, *http.Response, error) {
+	u, err := url.Parse(fmt.Sprintf("/posts/%d", memoID))
+
+	req, err := s.client.NewRequest(http.MethodPatch, u.String(), memoReq)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	mResp := &Memo{}
+	resp, err := s.client.Do(req, mResp)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return mResp, resp, err
+}
+
+func (s *MemoService) Delete(memoID string) (*http.Response, error) {
+	u, err := url.Parse(fmt.Sprintf("/posts/%s", memoID))
+
+	req, err := s.client.NewRequest(http.MethodDelete, u.String(), nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+	if err != nil {
+		return resp, err
+	}
+
+	return resp, err
 }

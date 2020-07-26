@@ -6,8 +6,6 @@ import (
 	"net/url"
 )
 
-//POST /teams/:domain/posts/:id/comments
-
 type CommentService struct {
 	client *Client
 }
@@ -19,31 +17,30 @@ func NewCommentService(client *Client) *CommentService {
 }
 
 type Comment struct {
-	ID int
-	Body string
+	ID     int
+	Body   string
 	Notice bool
-//	author_id
-//	published_at
+	//	author_id
+	//	published_at
 }
 
 type CommentRequest struct {
-	Body  string `json:"body"`
+	Body string `json:"body"`
 }
 
 type CommentResponse struct {
-	Body  string `json:"body"`
+	Body string `json:"body"`
 }
 
+func (s *CommentService) Create(postID int, cReq *CommentRequest) (*CommentResponse, *http.Response, error) {
 
-func (s *CommentService) Create(postID string, cReq *CommentRequest) (*CommentResponse, *http.Response, error) {
-
-	u, err := url.Parse(fmt.Sprintf("/posts/%s/comments", postID))
+	u, err := url.Parse(fmt.Sprintf("/posts/%d/comments", postID))
 
 	if err != nil {
 		return nil, nil, err
 	}
 
-	req, err := s.client.NewRequest("POST", u.String(), cReq)
+	req, err := s.client.NewRequest(http.MethodPost, u.String(), cReq)
 
 	if err != nil {
 		return nil, nil, err
@@ -58,18 +55,17 @@ func (s *CommentService) Create(postID string, cReq *CommentRequest) (*CommentRe
 	return cResp, resp, err
 }
 
-
-func (s *CommentService) Delete(commentID string) (*http.Response, error) {
-	u, err := url.Parse(fmt.Sprintf("/comments/%s", commentID))
+func (s *CommentService) Delete(commentID int) (*http.Response, error) {
+	u, err := url.Parse(fmt.Sprintf("/comments/%d", commentID))
 
 	if err != nil {
-
+		return nil, err
 	}
 
-	req, err := s.client.NewRequest("DELETE", u.String(), nil)
+	req, err := s.client.NewRequest(http.MethodDelete, u.String(), nil)
 
 	if err != nil {
-
+		return nil, err
 	}
 
 	cResp := &CommentResponse{}

@@ -11,7 +11,7 @@ import (
 
 const (
 	defaultBaseURL = "https://api.docbase.io/teams/%s"
-	apiVersion = "2"
+	apiVersion     = "2"
 )
 
 type Client struct {
@@ -63,9 +63,7 @@ func OptionDocbaseURL(url *url.URL) Option {
 
 func (c *Client) NewRequest(method, path string, body interface{}) (*http.Request, error) {
 
-	u, err := url.Parse(fmt.Sprintf("%s%s", c.BaseURL.String(), path))
-
-	log.Printf("New req %s", u.String())
+	u, err := url.Parse(fmt.Sprintf("%s/%s", c.BaseURL.String(), path))
 
 	if err != nil {
 		return nil, err
