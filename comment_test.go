@@ -3,10 +3,8 @@ package docbase
 import (
 	"fmt"
 	"github.com/hayashiki/docbase-go/testutil"
-	"log"
 	"net/http"
 	"reflect"
-	"strconv"
 	"testing"
 )
 
@@ -19,7 +17,6 @@ func TestCommentService_Create(t *testing.T) {
 	}
 
 	mux.HandleFunc(fmt.Sprintf("/posts/%d/comments", post.ID), func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("memo")
 		fmt.Fprint(w, testutil.LoadFixture(t, "comment-response.json"))
 	})
 
@@ -28,10 +25,10 @@ func TestCommentService_Create(t *testing.T) {
 	cReq := &CommentRequest{}
 
 	want := &CommentResponse{
-		Body:   "コメント",
+		Body: "コメント",
 	}
 
-	comment, _, err := commentSvc.Create(strconv.Itoa(post.ID), cReq)
+	comment, _, err := commentSvc.Create(post.ID, cReq)
 
 	if err != nil {
 		t.Errorf("Shouldn't have returned an error: %+v", err)
