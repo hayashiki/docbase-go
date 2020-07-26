@@ -37,8 +37,8 @@ type UGroup struct {
 //include_user_groups ※	ユーザの所属グループを含めるかどうか	Boolean		false
 
 type UserListOptions struct {
-	Q string
-	Page int
+	Q       string
+	Page    int
 	PerPage int
 }
 
@@ -50,11 +50,10 @@ func (s *UserService) List(opts *UserListOptions) (*[]User, *http.Response, erro
 	u, err := url.Parse("/users")
 
 	if err != nil {
-
+		return nil, nil, err
 	}
 
 	q := u.Query()
-
 	q.Set("per_page", strconv.Itoa(opts.PerPage))
 	q.Set("page", strconv.Itoa(opts.Page))
 	q.Set("q", opts.Q)
@@ -62,7 +61,7 @@ func (s *UserService) List(opts *UserListOptions) (*[]User, *http.Response, erro
 	req, err := s.client.NewRequest("GET", u.String(), nil)
 
 	if err != nil {
-
+		return nil, nil, err
 	}
 
 	userResp := &[]User{}
@@ -73,4 +72,3 @@ func (s *UserService) List(opts *UserListOptions) (*[]User, *http.Response, erro
 
 	return userResp, resp, err
 }
-
