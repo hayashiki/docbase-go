@@ -91,7 +91,6 @@ func (c *Client) NewRequest(method, path string, body interface{}) (*http.Reques
 func (c *Client) Do(r *http.Request, v interface{}) (*http.Response, error) {
 	resp, err := c.Client.Do(r)
 
-
 	if err != nil {
 		return nil, err
 	}
