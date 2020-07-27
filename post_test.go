@@ -230,13 +230,12 @@ func TestMemoService_Update(t *testing.T) {
 	}
 }
 
-
 func TestMemoService_Archive(t *testing.T) {
 	setup()
 	defer teardown()
 
 	memo := &Post{
-		ID:        1,
+		ID: 1,
 	}
 
 	memoSvc := NewPostService(client)
@@ -264,7 +263,7 @@ func TestMemoService_Unarchive(t *testing.T) {
 	defer teardown()
 
 	memo := &Post{
-		ID:        1,
+		ID: 1,
 	}
 
 	memoSvc := NewPostService(client)
