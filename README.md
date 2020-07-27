@@ -9,14 +9,14 @@
 - [x] memo create
 - [x] memo update
 - [x] memo delete
-- [ ] memo archive
-- [ ] memo unarchive
+- [x] memo archive
+- [x] memo unarchive
 - [x] comment create
 - [x] comment delete
 - [x] user list(search)
-- [ ] tag list
+- [x] tag list
 - [ ] attachment
-- [ ] group list(search)
-- [ ] group get
-- [ ] group user create
-- [ ] group user delete
+- [x] group list(search)
+- [x] group get
+- [x] group user create
+- [x] group user delete
