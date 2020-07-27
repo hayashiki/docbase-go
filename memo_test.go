@@ -229,3 +229,60 @@ func TestMemoService_Update(t *testing.T) {
 		t.Errorf("Get returned %+v, want %+v", res, memo)
 	}
 }
+
+
+func TestMemoService_Archive(t *testing.T) {
+	setup()
+	defer teardown()
+
+	memo := &Memo{
+		ID:        1,
+	}
+
+	memoSvc := NewMemoService(client)
+
+	mux.HandleFunc(fmt.Sprintf("/posts/%d/archive", memo.ID), func(w http.ResponseWriter, r *http.Request) {
+		u, _ := url.Parse(fmt.Sprintf("/posts/%d/archive", memo.ID))
+
+		want := u.String()
+		if got := r.URL.String(); got != want {
+			t.Errorf("URL: got %v, want %v", got, want)
+		}
+
+		fmt.Fprint(w, `{}`)
+	})
+
+	_, err := memoSvc.Archive(memo.ID)
+
+	if err != nil {
+		t.Errorf("Archive returned an error: %v", err)
+	}
+}
+
+func TestMemoService_Unarchive(t *testing.T) {
+	setup()
+	defer teardown()
+
+	memo := &Memo{
+		ID:        1,
+	}
+
+	memoSvc := NewMemoService(client)
+
+	mux.HandleFunc(fmt.Sprintf("/posts/%d/unarchive", memo.ID), func(w http.ResponseWriter, r *http.Request) {
+		u, _ := url.Parse(fmt.Sprintf("/posts/%d/unarchive", memo.ID))
+
+		want := u.String()
+		if got := r.URL.String(); got != want {
+			t.Errorf("URL: got %v, want %v", got, want)
+		}
+
+		fmt.Fprint(w, `{}`)
+	})
+
+	_, err := memoSvc.Unarchive(memo.ID)
+
+	if err != nil {
+		t.Errorf("Unarchive returned an error: %v", err)
+	}
+}

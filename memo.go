@@ -168,3 +168,45 @@ func (s *MemoService) Delete(memoID string) (*http.Response, error) {
 
 	return resp, err
 }
+
+func (s *MemoService) Archive(memoID int) (*http.Response, error) {
+	u, err := url.Parse(fmt.Sprintf("/posts/%d/archive", memoID))
+
+	req, err := s.client.NewRequest(http.MethodPut, u.String(), nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, err
+}
+
+func (s *MemoService) Unarchive(memoID int) (*http.Response, error) {
+	u, err := url.Parse(fmt.Sprintf("/posts/%d/unarchive", memoID))
+
+	req, err := s.client.NewRequest(http.MethodPut, u.String(), nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, err
+}
