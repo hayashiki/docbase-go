@@ -34,8 +34,8 @@ func TestUserService_List(t *testing.T) {
 		PostsCount:            2,
 		LastAccessTime:        ti, // 2019-02-18T11:52:56.000+09:00
 		TwoStepAuthentication: false,
-		Groups: []UGroup{
-			UGroup{
+		Groups: []SimpleGroup{
+			SimpleGroup{
 				ID:   1,
 				Name: "グループ1",
 			},
@@ -51,7 +51,7 @@ func TestUserService_List(t *testing.T) {
 		PostsCount:            3,
 		LastAccessTime:        ti, //2019-02-18T11:52:56.000+09:00
 		TwoStepAuthentication: false,
-		Groups:                []UGroup{},
+		Groups:                []SimpleGroup{},
 	}
 
 	user3 := &User{
@@ -63,7 +63,7 @@ func TestUserService_List(t *testing.T) {
 		PostsCount:            5,
 		LastAccessTime:        ti, //"2019-02-18T11:52:56.000+09:00"
 		TwoStepAuthentication: false,
-		Groups:                []UGroup{},
+		Groups:                []SimpleGroup{},
 	}
 
 	opts := &UserListOptions{

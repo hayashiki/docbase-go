@@ -12,20 +12,21 @@ type UserService struct {
 }
 
 type User struct {
-	ID                    int       `json:"id"`
-	Name                  string    `json:"name"`
-	Username              string    `json:"username"`
-	ProfileImageURL       string    `json:"profile_image_url"`
-	Role                  string    `json:"role"`
-	PostsCount            int       `json:"posts_count"`
-	LastAccessTime        time.Time `json:"last_access_time"`
-	TwoStepAuthentication bool      `json:"two_step_authentication"`
-	Groups                []UGroup  `json:"groups"`
+	ID                    int           `json:"id"`
+	Name                  string        `json:"name"`
+	Username              string        `json:"username"`
+	ProfileImageURL       string        `json:"profile_image_url"`
+	Role                  string        `json:"role"`
+	PostsCount            int           `json:"posts_count"`
+	LastAccessTime        time.Time     `json:"last_access_time"`
+	TwoStepAuthentication bool          `json:"two_step_authentication"`
+	Groups                []SimpleGroup `json:"groups"`
 }
 
-type UGroup struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+type SimpleUser struct {
+	ID              int    `json:"id"`
+	Name            string `json:"name"`
+	ProfileImageURL string `json:"profile_image_url"`
 }
 
 //curl \

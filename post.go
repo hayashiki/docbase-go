@@ -7,12 +7,12 @@ import (
 	"time"
 )
 
-type MemoService struct {
+type PostService struct {
 	client *Client
 }
 
-func NewMemoService(client *Client) *MemoService {
-	return &MemoService{client: client}
+func NewPostService(client *Client) *PostService {
+	return &PostService{client: client}
 }
 
 type MemoRequest struct {
@@ -25,7 +25,7 @@ type MemoRequest struct {
 	Groups []string
 }
 
-type Memo struct {
+type Post struct {
 	ID            int              `json:"id"`
 	Title         string           `json:"title"`
 	Body          string           `json:"body"`
@@ -33,40 +33,25 @@ type Memo struct {
 	Archived      bool             `json:"archived"`
 	URL           string           `json:"url"`
 	CreatedAt     time.Time        `json:"created_at"`
-	Tags          []MemoTag        `json:"tags"`
+	Tags          []Tag            `json:"tags"`
 	Scope         string           `json:"scope"`
 	SharingURL    string           `json:"sharing_url"`
-	User          MemoUser         `json:"user"`
+	User          SimpleUser       `json:"user"`
 	StarsCount    int              `json:"stars_count"`
 	GoodJobsCount int              `json:"good_jobs_count"`
-	Comments      []MemoComment    `json:"comments"`
-	Groups        []MemoGroup      `json:"groups"`
-	Attachments   []MemoAttachment `json:"attachments"`
+	Comments      []PostComment    `json:"comments"`
+	Groups        []SimpleGroup    `json:"groups"`
+	Attachments   []PostAttachment `json:"attachments"`
 }
 
-type MemoComment struct {
+type PostComment struct {
 	ID        int
 	Body      string
 	CreatedAt time.Time `json:"created_at"`
-	MemoUser
+	SimpleUser
 }
 
-type MemoTag struct {
-	Name string `json:"name"`
-}
-
-type MemoUser struct {
-	ID              int    `json:"id"`
-	Name            string `json:"name"`
-	ProfileImageURL string `json:"profile_image_url"`
-}
-
-type MemoGroup struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-}
-
-type MemoAttachment struct {
+type PostAttachment struct {
 	ID        string    `json:"id"`
 	Name      string    `json:"name"`
 	Size      int       `json:"size"`
@@ -75,10 +60,8 @@ type MemoAttachment struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-func (s *MemoService) Create(memoReq *MemoRequest) (*Memo, *http.Response, error) {
+func (s *PostService) Create(memoReq *MemoRequest) (*Post, *http.Response, error) {
 	u, err := url.Parse("/posts")
-
-	//	TODO: return if not have scope permission
 
 	if err != nil {
 		return nil, nil, err
@@ -90,7 +73,7 @@ func (s *MemoService) Create(memoReq *MemoRequest) (*Memo, *http.Response, error
 		return nil, nil, err
 	}
 
-	mResp := &Memo{}
+	mResp := &Post{}
 	resp, err := s.client.Do(req, mResp)
 
 	if err != nil {
@@ -100,11 +83,9 @@ func (s *MemoService) Create(memoReq *MemoRequest) (*Memo, *http.Response, error
 	return mResp, resp, err
 }
 
-func (s *MemoService) Get(memoID int) (*Memo, *http.Response, error) {
+func (s *PostService) Get(memoID int) (*Post, *http.Response, error) {
 
 	u, err := url.Parse(fmt.Sprintf("/posts/%d", memoID))
-
-	//	TODO: return if not have scope permission
 
 	if err != nil {
 		return nil, nil, err
@@ -116,7 +97,7 @@ func (s *MemoService) Get(memoID int) (*Memo, *http.Response, error) {
 		return nil, nil, err
 	}
 
-	mResp := &Memo{}
+	mResp := &Post{}
 	resp, err := s.client.Do(req, mResp)
 
 	if err != nil {
@@ -126,11 +107,7 @@ func (s *MemoService) Get(memoID int) (*Memo, *http.Response, error) {
 	return mResp, resp, err
 }
 
-type SuccessResponse struct {
-	Success bool `json:"success"`
-}
-
-func (s *MemoService) Update(memoID int, memoReq *MemoRequest) (*Memo, *http.Response, error) {
+func (s *PostService) Update(memoID int, memoReq *MemoRequest) (*Post, *http.Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%d", memoID))
 
 	req, err := s.client.NewRequest(http.MethodPatch, u.String(), memoReq)
@@ -139,7 +116,7 @@ func (s *MemoService) Update(memoID int, memoReq *MemoRequest) (*Memo, *http.Res
 		return nil, nil, err
 	}
 
-	mResp := &Memo{}
+	mResp := &Post{}
 	resp, err := s.client.Do(req, mResp)
 	if err != nil {
 		return nil, nil, err
@@ -152,7 +129,7 @@ func (s *MemoService) Update(memoID int, memoReq *MemoRequest) (*Memo, *http.Res
 	return mResp, resp, err
 }
 
-func (s *MemoService) Delete(memoID string) (*http.Response, error) {
+func (s *PostService) Delete(memoID string) (*http.Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%s", memoID))
 
 	req, err := s.client.NewRequest(http.MethodDelete, u.String(), nil)
@@ -169,7 +146,7 @@ func (s *MemoService) Delete(memoID string) (*http.Response, error) {
 	return resp, err
 }
 
-func (s *MemoService) Archive(memoID int) (*http.Response, error) {
+func (s *PostService) Archive(memoID int) (*http.Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%d/archive", memoID))
 
 	req, err := s.client.NewRequest(http.MethodPut, u.String(), nil)
@@ -190,7 +167,7 @@ func (s *MemoService) Archive(memoID int) (*http.Response, error) {
 	return resp, err
 }
 
-func (s *MemoService) Unarchive(memoID int) (*http.Response, error) {
+func (s *PostService) Unarchive(memoID int) (*http.Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%d/unarchive", memoID))
 
 	req, err := s.client.NewRequest(http.MethodPut, u.String(), nil)

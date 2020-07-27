@@ -18,7 +18,7 @@ func TestMemoService_Create(t *testing.T) {
 		fmt.Fprintf(w, testutil.LoadFixture(t, "memo-detail-response.json"))
 	})
 
-	memoSrv := NewMemoService(client)
+	memoSrv := NewPostService(client)
 
 	mReq := &MemoRequest{}
 
@@ -34,7 +34,7 @@ func TestMemoService_Create(t *testing.T) {
 		t.Errorf("Fail to parse err: %v", err)
 	}
 
-	want := &Memo{
+	want := &Post{
 		ID:        1,
 		Title:     "メモのタイトル",
 		Body:      "メモの本文",
@@ -42,27 +42,27 @@ func TestMemoService_Create(t *testing.T) {
 		Archived:  false,
 		URL:       "https://kray.docbase.io/posts/1",
 		CreatedAt: ti,
-		Tags: []MemoTag{
-			MemoTag{Name: "rails"},
-			MemoTag{Name: "ruby"},
+		Tags: []Tag{
+			Tag{Name: "rails"},
+			Tag{Name: "ruby"},
 		},
 		Scope:      "group",
 		SharingURL: "https://docbase.io/posts/1/sharing/abcdefgh-0e81-4567-9876-1234567890ab",
-		User: MemoUser{
+		User: SimpleUser{
 			ID:              1,
 			Name:            "danny",
 			ProfileImageURL: "https://image.docbase.io/uploads/aaa.gif",
 		},
 		StarsCount:    1,
 		GoodJobsCount: 2,
-		Comments:      []MemoComment{},
-		Groups: []MemoGroup{
-			MemoGroup{
+		Comments:      []PostComment{},
+		Groups: []SimpleGroup{
+			SimpleGroup{
 				ID:   1,
 				Name: "DocBase",
 			},
 		},
-		Attachments: []MemoAttachment{MemoAttachment{
+		Attachments: []PostAttachment{PostAttachment{
 			ID:        "461d38b9-8c22-4222-a6a2-a6f2ce98ec3a.csv",
 			Name:      "uploadfile.csv",
 			Size:      18786,
@@ -89,7 +89,7 @@ func TestMemoService_Get(t *testing.T) {
 		t.Errorf("Fail to parse err: %v", err)
 	}
 
-	memo := &Memo{
+	memo := &Post{
 		ID:        1,
 		Title:     "メモのタイトル",
 		Body:      "メモの本文",
@@ -97,27 +97,27 @@ func TestMemoService_Get(t *testing.T) {
 		Archived:  false,
 		URL:       "https://kray.docbase.io/posts/1",
 		CreatedAt: ti,
-		Tags: []MemoTag{
-			MemoTag{Name: "rails"},
-			MemoTag{Name: "ruby"},
+		Tags: []Tag{
+			Tag{Name: "rails"},
+			Tag{Name: "ruby"},
 		},
 		Scope:      "group",
 		SharingURL: "https://docbase.io/posts/1/sharing/abcdefgh-0e81-4567-9876-1234567890ab",
-		User: MemoUser{
+		User: SimpleUser{
 			ID:              1,
 			Name:            "danny",
 			ProfileImageURL: "https://image.docbase.io/uploads/aaa.gif",
 		},
 		StarsCount:    1,
 		GoodJobsCount: 2,
-		Comments:      []MemoComment{},
-		Groups: []MemoGroup{
-			MemoGroup{
+		Comments:      []PostComment{},
+		Groups: []SimpleGroup{
+			SimpleGroup{
 				ID:   1,
 				Name: "DocBase",
 			},
 		},
-		Attachments: []MemoAttachment{MemoAttachment{
+		Attachments: []PostAttachment{PostAttachment{
 			ID:        "461d38b9-8c22-4222-a6a2-a6f2ce98ec3a.csv",
 			Name:      "uploadfile.csv",
 			Size:      18786,
@@ -128,7 +128,7 @@ func TestMemoService_Get(t *testing.T) {
 		},
 	}
 
-	memoSvc := NewMemoService(client)
+	memoSvc := NewPostService(client)
 
 	mux.HandleFunc(fmt.Sprintf("/posts/%d", memo.ID), func(w http.ResponseWriter, r *http.Request) {
 		//requestSent = true
@@ -164,7 +164,7 @@ func TestMemoService_Update(t *testing.T) {
 		t.Errorf("Fail to parse err: %v", err)
 	}
 
-	memo := &Memo{
+	memo := &Post{
 		ID:        1,
 		Title:     "メモのタイトル",
 		Body:      "メモの本文",
@@ -172,27 +172,27 @@ func TestMemoService_Update(t *testing.T) {
 		Archived:  false,
 		URL:       "https://kray.docbase.io/posts/1",
 		CreatedAt: ti,
-		Tags: []MemoTag{
-			MemoTag{Name: "rails"},
-			MemoTag{Name: "ruby"},
+		Tags: []Tag{
+			Tag{Name: "rails"},
+			Tag{Name: "ruby"},
 		},
 		Scope:      "group",
 		SharingURL: "https://docbase.io/posts/1/sharing/abcdefgh-0e81-4567-9876-1234567890ab",
-		User: MemoUser{
+		User: SimpleUser{
 			ID:              1,
 			Name:            "danny",
 			ProfileImageURL: "https://image.docbase.io/uploads/aaa.gif",
 		},
 		StarsCount:    1,
 		GoodJobsCount: 2,
-		Comments:      []MemoComment{},
-		Groups: []MemoGroup{
-			MemoGroup{
+		Comments:      []PostComment{},
+		Groups: []SimpleGroup{
+			SimpleGroup{
 				ID:   1,
 				Name: "DocBase",
 			},
 		},
-		Attachments: []MemoAttachment{MemoAttachment{
+		Attachments: []PostAttachment{PostAttachment{
 			ID:        "461d38b9-8c22-4222-a6a2-a6f2ce98ec3a.csv",
 			Name:      "uploadfile.csv",
 			Size:      18786,
@@ -203,7 +203,7 @@ func TestMemoService_Update(t *testing.T) {
 		},
 	}
 
-	memoSvc := NewMemoService(client)
+	memoSvc := NewPostService(client)
 
 	mux.HandleFunc(fmt.Sprintf("/posts/%d", memo.ID), func(w http.ResponseWriter, r *http.Request) {
 		u, _ := url.Parse(fmt.Sprintf("/posts/%d", memo.ID))
@@ -235,11 +235,11 @@ func TestMemoService_Archive(t *testing.T) {
 	setup()
 	defer teardown()
 
-	memo := &Memo{
+	memo := &Post{
 		ID:        1,
 	}
 
-	memoSvc := NewMemoService(client)
+	memoSvc := NewPostService(client)
 
 	mux.HandleFunc(fmt.Sprintf("/posts/%d/archive", memo.ID), func(w http.ResponseWriter, r *http.Request) {
 		u, _ := url.Parse(fmt.Sprintf("/posts/%d/archive", memo.ID))
@@ -263,11 +263,11 @@ func TestMemoService_Unarchive(t *testing.T) {
 	setup()
 	defer teardown()
 
-	memo := &Memo{
+	memo := &Post{
 		ID:        1,
 	}
 
-	memoSvc := NewMemoService(client)
+	memoSvc := NewPostService(client)
 
 	mux.HandleFunc(fmt.Sprintf("/posts/%d/unarchive", memo.ID), func(w http.ResponseWriter, r *http.Request) {
 		u, _ := url.Parse(fmt.Sprintf("/posts/%d/unarchive", memo.ID))

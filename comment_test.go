@@ -12,7 +12,7 @@ func TestCommentService_Create(t *testing.T) {
 	setup()
 	defer teardown()
 
-	post := &Memo{
+	post := &Post{
 		ID: 1,
 	}
 
