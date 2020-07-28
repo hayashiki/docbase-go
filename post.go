@@ -12,11 +12,7 @@ type PostService struct {
 	client *Client
 }
 
-func NewPostService(client *Client) *PostService {
-	return &PostService{client: client}
-}
-
-type MemoRequest struct {
+type PostRequest struct {
 	Title  string `json:"title"`
 	Body   string `json:"body"`
 	Draft  bool   `json:"draft"`  // optional, default: false
@@ -28,10 +24,10 @@ type MemoRequest struct {
 
 type PostListResponse struct {
 	Posts []Post `json:"posts"`
-	Meta struct {
+	Meta  struct {
 		PreviousPage string `json:"previous_page"`
-		NextPage     string      `json:"next_page"`
-		Total        int         `json:"total"`
+		NextPage     string `json:"next_page"`
+		Total        int    `json:"total"`
 	} `json:"meta"`
 }
 
@@ -105,7 +101,7 @@ func (s *PostService) List(opts *PostListOptions) (*PostListResponse, *http.Resp
 	return mResp, resp, err
 }
 
-func (s *PostService) Create(memoReq *MemoRequest) (*Post, *http.Response, error) {
+func (s *PostService) Create(memoReq *PostRequest) (*Post, *http.Response, error) {
 	u, err := url.Parse("/posts")
 
 	if err != nil {
@@ -152,7 +148,7 @@ func (s *PostService) Get(memoID int) (*Post, *http.Response, error) {
 	return mResp, resp, err
 }
 
-func (s *PostService) Update(memoID int, memoReq *MemoRequest) (*Post, *http.Response, error) {
+func (s *PostService) Update(memoID int, memoReq *PostRequest) (*Post, *http.Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%d", memoID))
 	if err != nil {
 		return nil, nil, err
@@ -243,4 +239,8 @@ func (s *PostService) Unarchive(memoID int) (*http.Response, error) {
 	}
 
 	return resp, err
+}
+
+func NewPostService(client *Client) *PostService {
+	return &PostService{client: client}
 }
