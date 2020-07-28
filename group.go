@@ -12,8 +12,19 @@ type GroupService struct {
 	client *Client
 }
 
-func NewGroupService(client *Client) *GroupService {
-	return &GroupService{client: client}
+type SimpleGroup struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+type Group struct {
+	ID             int          `json:"id"`
+	Name           string       `json:"name"`
+	Description    string       `json:"description"`
+	PostsCount     int          `json:"posts_count"`
+	LastActivityAt time.Time    `json:"last_activity_at"`
+	CreatedAt      time.Time    `json:"created_at"`
+	Users          []SimpleUser `json:"users"`
 }
 
 type GroupAddRequest struct {
@@ -36,28 +47,9 @@ type GroupRequest struct {
 	Groups []string
 }
 
-type Group struct {
-	ID             int         `json:"id"`
-	Name           string      `json:"name"`
-	Description    string      `json:"description"`
-	PostsCount     int         `json:"posts_count"`
-	LastActivityAt time.Time   `json:"last_activity_at"`
-	CreatedAt      time.Time   `json:"created_at"`
-	Users          []GroupUser `json:"users"`
-}
+type GroupListResponse []SimpleGroup
 
-type GroupUser struct {
-	ID              int    `json:"id"`
-	Name            string `json:"name"`
-	ProfileImageURL string `json:"profile_image_url"`
-}
-
-type SimpleGroup struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-}
-
-func (s *GroupService) List(opts *GroupListOptions) (*[]SimpleGroup, *http.Response, error) {
+func (s *GroupService) List(opts *GroupListOptions) (*GroupListResponse, *http.Response, error) {
 	u, err := url.Parse("/groups")
 
 	if err != nil {
@@ -75,7 +67,7 @@ func (s *GroupService) List(opts *GroupListOptions) (*[]SimpleGroup, *http.Respo
 		return nil, nil, err
 	}
 
-	res := &[]SimpleGroup{}
+	res := &GroupListResponse{}
 	resp, err := s.client.Do(req, res)
 
 	if err != nil {
@@ -153,4 +145,8 @@ func (s *GroupService) RemoveUser(id int, gReq *GroupAddRequest) (*http.Response
 	}
 
 	return resp, err
+}
+
+func NewGroupService(client *Client) *GroupService {
+	return &GroupService{client: client}
 }

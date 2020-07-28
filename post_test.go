@@ -20,7 +20,7 @@ func TestMemoService_Create(t *testing.T) {
 
 	memoSrv := NewPostService(client)
 
-	mReq := &MemoRequest{}
+	mReq := &PostRequest{}
 
 	actual, _, err := memoSrv.Create(mReq)
 
@@ -217,7 +217,7 @@ func TestMemoService_Update(t *testing.T) {
 	})
 
 	// TDOO どんなリクエストボディでも固定レスポンス返してしまうので、検証はさみたい
-	mReq := &MemoRequest{}
+	mReq := &PostRequest{}
 
 	res, _, err := memoSvc.Update(memo.ID, mReq)
 

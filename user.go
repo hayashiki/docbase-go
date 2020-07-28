@@ -29,6 +29,8 @@ type SimpleUser struct {
 	ProfileImageURL string `json:"profile_image_url"`
 }
 
+type UserListResponse []User
+
 //curl \
 //  -H 'X-DocBaseToken: ACCESS TOKEN' \
 //  https://api.docbase.io/teams/kray/users?include_user_groups=true
@@ -43,11 +45,7 @@ type UserListOptions struct {
 	PerPage int
 }
 
-func NewUserService(client *Client) *UserService {
-	return &UserService{client: client}
-}
-
-func (s *UserService) List(opts *UserListOptions) (*[]User, *http.Response, error) {
+func (s *UserService) List(opts *UserListOptions) (*UserListResponse, *http.Response, error) {
 	u, err := url.Parse("/users")
 
 	if err != nil {
@@ -65,11 +63,15 @@ func (s *UserService) List(opts *UserListOptions) (*[]User, *http.Response, erro
 		return nil, nil, err
 	}
 
-	userResp := &[]User{}
+	userResp := &UserListResponse{}
 	resp, err := s.client.Do(req, userResp)
 	if err != nil {
 		return nil, resp, err
 	}
 
 	return userResp, resp, err
+}
+
+func NewUserService(client *Client) *UserService {
+	return &UserService{client: client}
 }

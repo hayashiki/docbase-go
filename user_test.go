@@ -25,7 +25,7 @@ func TestUserService_List(t *testing.T) {
 		t.Errorf("Fail to parse err: %v", err)
 	}
 
-	user1 := &User{
+	user1 := User{
 		ID:                    1,
 		Name:                  "ドックベースマン",
 		Username:              "docbaseman",
@@ -42,7 +42,7 @@ func TestUserService_List(t *testing.T) {
 		},
 	}
 
-	user2 := &User{
+	user2 := User{
 		ID:                    2,
 		Name:                  "ドックベースウーマン",
 		Username:              "docbasewoman",
@@ -54,7 +54,7 @@ func TestUserService_List(t *testing.T) {
 		Groups:                []SimpleGroup{},
 	}
 
-	user3 := &User{
+	user3 := User{
 		ID:                    3,
 		Name:                  "ドックべーサー",
 		Username:              "docbaser",
@@ -74,7 +74,7 @@ func TestUserService_List(t *testing.T) {
 
 	users, _, _ := userSvc.List(opts)
 
-	want := &[]User{*user1, *user2, *user3}
+	want := &UserListResponse{user1, user2, user3}
 	if !reflect.DeepEqual(users, want) {
 		t.Errorf("Users returned %+v, want %+v", users, want)
 	}

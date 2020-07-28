@@ -19,12 +19,12 @@ func TestGroupService_List(t *testing.T) {
 		fmt.Fprint(w, testutil.LoadFixture(t, "group-list-response.json"))
 	})
 
-	group1 := &SimpleGroup{
+	group1 := SimpleGroup{
 		ID:   1,
 		Name: "DocBase",
 	}
 
-	group2 := &SimpleGroup{
+	group2 := SimpleGroup{
 		ID:   2,
 		Name: "kray-internal",
 	}
@@ -37,7 +37,7 @@ func TestGroupService_List(t *testing.T) {
 
 	groups, _, _ := groupSvc.List(opts)
 
-	want := &[]SimpleGroup{*group1, *group2}
+	want := &GroupListResponse{group1, group2}
 	if !reflect.DeepEqual(groups, want) {
 		t.Errorf("GroupList returned %+v, want %+v", groups, want)
 	}
@@ -62,8 +62,8 @@ func TestGroupService_Get(t *testing.T) {
 		PostsCount:     0,
 		LastActivityAt: ti,
 		CreatedAt:      ti,
-		Users: []GroupUser{
-			GroupUser{
+		Users: []SimpleUser{
+			SimpleUser{
 				ID:              1,
 				Name:            "docbaseman",
 				ProfileImageURL: "https://image.docbase.io/uploads/aaa.gif",
