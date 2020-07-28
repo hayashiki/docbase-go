@@ -12,6 +12,8 @@ import (
 const (
 	defaultBaseURL = "https://api.docbase.io/teams/%s"
 	apiVersion     = "2"
+	//TODO Add user_agent like docbase ruby gem
+	//USER_AGENT = "DocBase Go #{DocBase::VERSION}"
 )
 
 type Client struct {
@@ -19,6 +21,11 @@ type Client struct {
 	AccessToken string
 	Team        string
 	Client      *http.Client
+
+	Posts    *PostService
+	Groups   *GroupService
+	Tags     *TagService
+	Comments *CommentService
 }
 
 type Service struct {
