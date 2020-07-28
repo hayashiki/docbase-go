@@ -1,4 +1,6 @@
 
+![Go](https://github.com/hayashiki/docbase-go/workflows/Go/badge.svg)
+
 # docbase-go
 
  WIP!!
