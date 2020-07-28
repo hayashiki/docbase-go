@@ -15,7 +15,7 @@ func TestMemoService_Create(t *testing.T) {
 	defer teardown()
 
 	mux.HandleFunc("/posts", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, testutil.LoadFixture(t, "memo-detail-response.json"))
+		fmt.Fprint(w, testutil.LoadFixture(t, "post-detail-response.json"))
 	})
 
 	memoSrv := NewPostService(client)
@@ -140,7 +140,7 @@ func TestMemoService_Get(t *testing.T) {
 			t.Errorf("URL: got %v, want %v", got, want)
 		}
 
-		fmt.Fprint(w, testutil.LoadFixture(t, "memo-detail-response.json"))
+		fmt.Fprint(w, testutil.LoadFixture(t, "post-detail-response.json"))
 	})
 
 	getRes, _, err := memoSvc.Get(memo.ID)
@@ -213,7 +213,7 @@ func TestMemoService_Update(t *testing.T) {
 			t.Errorf("URL: got %v, want %v", got, want)
 		}
 
-		fmt.Fprint(w, testutil.LoadFixture(t, "memo-detail-response.json"))
+		fmt.Fprint(w, testutil.LoadFixture(t, "post-detail-response.json"))
 	})
 
 	// TDOO どんなリクエストボディでも固定レスポンス返してしまうので、検証はさみたい

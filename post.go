@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 )
 
@@ -25,6 +26,15 @@ type MemoRequest struct {
 	Groups []string
 }
 
+type PostListResponse struct {
+	Posts []Post `json:"posts"`
+	Meta struct {
+		PreviousPage string `json:"previous_page"`
+		NextPage     string      `json:"next_page"`
+		Total        int         `json:"total"`
+	} `json:"meta"`
+}
+
 type Post struct {
 	ID            int              `json:"id"`
 	Title         string           `json:"title"`
@@ -44,6 +54,12 @@ type Post struct {
 	Attachments   []PostAttachment `json:"attachments"`
 }
 
+type PostListOptions struct {
+	Q       string
+	Page    int
+	PerPage int
+}
+
 type PostComment struct {
 	ID        int
 	Body      string
@@ -58,6 +74,35 @@ type PostAttachment struct {
 	URL       string    `json:"url"`
 	Markdown  string    `json:"markdown"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+func (s *PostService) List(opts *PostListOptions) (*PostListResponse, *http.Response, error) {
+
+	u, err := url.Parse("/posts")
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	q := u.Query()
+	q.Set("per_page", strconv.Itoa(opts.PerPage))
+	q.Set("page", strconv.Itoa(opts.Page))
+	q.Set("q", opts.Q)
+
+	req, err := s.client.NewRequest("GET", u.String(), nil)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	mResp := &PostListResponse{}
+	resp, err := s.client.Do(req, mResp)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return mResp, resp, err
 }
 
 func (s *PostService) Create(memoReq *MemoRequest) (*Post, *http.Response, error) {
@@ -109,6 +154,9 @@ func (s *PostService) Get(memoID int) (*Post, *http.Response, error) {
 
 func (s *PostService) Update(memoID int, memoReq *MemoRequest) (*Post, *http.Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%d", memoID))
+	if err != nil {
+		return nil, nil, err
+	}
 
 	req, err := s.client.NewRequest(http.MethodPatch, u.String(), memoReq)
 
@@ -131,6 +179,9 @@ func (s *PostService) Update(memoID int, memoReq *MemoRequest) (*Post, *http.Res
 
 func (s *PostService) Delete(memoID string) (*http.Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%s", memoID))
+	if err != nil {
+		return nil, err
+	}
 
 	req, err := s.client.NewRequest(http.MethodDelete, u.String(), nil)
 
@@ -148,6 +199,9 @@ func (s *PostService) Delete(memoID string) (*http.Response, error) {
 
 func (s *PostService) Archive(memoID int) (*http.Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%d/archive", memoID))
+	if err != nil {
+		return nil, err
+	}
 
 	req, err := s.client.NewRequest(http.MethodPut, u.String(), nil)
 
@@ -169,6 +223,9 @@ func (s *PostService) Archive(memoID int) (*http.Response, error) {
 
 func (s *PostService) Unarchive(memoID int) (*http.Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%d/unarchive", memoID))
+	if err != nil {
+		return nil, err
+	}
 
 	req, err := s.client.NewRequest(http.MethodPut, u.String(), nil)
 
