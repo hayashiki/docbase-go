@@ -1,7 +1,7 @@
 
 ![Go](https://github.com/hayashiki/docbase-go/workflows/Go/badge.svg)
 [![codecov](https://codecov.io/gh/hayashiki/docbase-go/branch/develop/graph/badge.svg)](https://codecov.io/gh/hayashiki/docbase-go)
-[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)][license]
+![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)
 
 # docbase-go
 
@@ -10,7 +10,7 @@ docbase-go is unofficial Go wrapper tool for Docbase API.
 # Installation
 
 ```
-go get 
+go get github.com/hayashiki/docbase-go
 ```
 
 # Example
@@ -52,7 +52,5 @@ posts, resp, err := client.Posts.List(&docbase.PostListOptions{})
 
 # Note
 
-[Here is the full API.](https://help.docbase.io/posts/45703)
-
-# License
+[Here is the original full API.](https://help.docbase.io/posts/45703)
 
