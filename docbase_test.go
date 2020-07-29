@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"reflect"
 	"testing"
 )
 
@@ -63,3 +64,25 @@ func TestClient_NewRequest(t *testing.T) {
 		t.Errorf("NewRequest(%q) Body is %v, want %v", inBody, got, want)
 	}
 }
+
+func TestDo_httpError(t *testing.T) {
+	setup()
+	defer teardown()
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+	})
+
+	req, _ := client.NewRequest("GET", "/", nil)
+	_, err := client.Do(req, nil)
+
+	_, ok := err.(*ErrorResponse)
+	if !ok {
+		t.Errorf("Error should be of type ErrorResponse but is %v: %+v", reflect.TypeOf(err), err)
+	}
+
+	if got, want := err.Error(), "Bad Request"; got != want {
+		t.Errorf("Request Do %v, want %v", got, want)
+	}
+}
+
