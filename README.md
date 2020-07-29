@@ -1,5 +1,6 @@
 
 ![Go](https://github.com/hayashiki/docbase-go/workflows/Go/badge.svg)
+[![codecov](https://codecov.io/gh/hayashiki/docbase-go/branch/develop/graph/badge.svg)](https://codecov.io/gh/hayashiki/docbase-go)
 
 # docbase-go
 
