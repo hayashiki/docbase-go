@@ -4,22 +4,54 @@
 
 # docbase-go
 
- WIP!!
+docbase-go is unofficial Go wrapper tool for Docbase API.
 
-# API Index
-- [ ] memo list(search)
-- [x] memo get
-- [x] memo create
-- [x] memo update
-- [x] memo delete
-- [x] memo archive
-- [x] memo unarchive
-- [x] comment create
-- [x] comment delete
-- [x] user list(search)
-- [x] tag list
-- [ ] attachment
-- [x] group list(search)
-- [x] group get
-- [x] group user create
-- [x] group user delete
+# Installation
+
+```
+go get 
+```
+
+# Example
+
+Get all your team posts
+
+```
+package main
+
+import (
+  "fmt"
+  "github.com/hayashiki/docbase-go" 
+)
+
+
+func main() {
+  client = docbase.NewClient(nil, "your_team", "your_token")
+
+  opts := &docbase.PostListOptions{
+    PerPage: 5,
+    Page:    1,
+    Q:       "query something",
+  }
+  
+  posts, resp, err := client.Posts.List(opts)
+  fmt.Printf("%+v", posts)
+}
+
+```
+
+# API
+
+## Posts
+
+``` go
+// Get the information about the post list
+posts, resp, err := client.Posts.List(&docbase.PostListOptions{})
+```
+
+# Note
+
+[Here is the full API.](https://help.docbase.io/posts/45703)
+
+# License
+
