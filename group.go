@@ -71,7 +71,7 @@ func (s *GroupService) List(opts *GroupListOptions) (*GroupListResponse, *http.R
 	resp, err := s.client.Do(req, res)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, resp, err
 	}
 
 	return res, resp, err

@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 const (
@@ -23,6 +24,7 @@ type Client struct {
 	Client      *http.Client
 
 	Posts    *PostService
+	Users    *UserService
 	Groups   *GroupService
 	Tags     *TagService
 	Comments *CommentService
@@ -30,6 +32,14 @@ type Client struct {
 
 type Service struct {
 	client *Client
+}
+
+type ErrorResponse struct {
+	Messages []string `json:"messages"`
+}
+
+func (e *ErrorResponse) Error() string {
+	return strings.Join(e.Messages, "\n - ")
 }
 
 func NewClient(httpClient *http.Client, team, token string, opts ...Option) *Client {
@@ -56,6 +66,12 @@ func NewClient(httpClient *http.Client, team, token string, opts ...Option) *Cli
 	if cli.BaseURL == nil {
 		cli.BaseURL = baseURL
 	}
+
+	cli.Posts = NewPostService(cli)
+	cli.Groups = NewGroupService(cli)
+	cli.Users = NewUserService(cli)
+	cli.Comments = NewCommentService(cli)
+	cli.Tags = NewTagService(cli)
 
 	return cli
 }
@@ -104,6 +120,11 @@ func (c *Client) Do(r *http.Request, v interface{}) (*http.Response, error) {
 
 	defer resp.Body.Close()
 
+	err = CheckResponse(resp)
+	if err != nil {
+		return resp, err
+	}
+
 	dec := json.NewDecoder(resp.Body)
 
 	err = dec.Decode(&v)
@@ -111,4 +132,31 @@ func (c *Client) Do(r *http.Request, v interface{}) (*http.Response, error) {
 		return resp, err
 	}
 	return resp, nil
+}
+
+func CheckResponse(r *http.Response) error {
+	switch r.StatusCode {
+	case http.StatusOK:
+		return nil
+	case http.StatusInternalServerError:
+		return &ErrorResponse{
+			Messages: []string{"Internal Server Error"},
+		}
+	case http.StatusBadRequest:
+		return &ErrorResponse{
+			Messages: []string{"Bad Request"},
+		}
+	case http.StatusForbidden:
+		return &ErrorResponse{
+			Messages: []string{"Forbidden"},
+		}
+	default:
+		var errResp ErrorResponse
+		dec := json.NewDecoder(r.Body)
+		err := dec.Decode(&errResp)
+		if err != nil {
+			errResp.Messages = []string{"Couldn't decode response body JSON"}
+		}
+		return &errResp
+	}
 }
