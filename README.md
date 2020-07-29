@@ -1,6 +1,7 @@
 
 ![Go](https://github.com/hayashiki/docbase-go/workflows/Go/badge.svg)
 [![codecov](https://codecov.io/gh/hayashiki/docbase-go/branch/develop/graph/badge.svg)](https://codecov.io/gh/hayashiki/docbase-go)
+[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)][license]
 
 # docbase-go
 
