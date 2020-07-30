@@ -18,17 +18,17 @@ func TestTagService_List(t *testing.T) {
 		fmt.Fprint(w, testutil.LoadFixture(t, "tag-list-response.json"))
 	})
 
-	tag1 := &Tag{
+	tag1 := Tag{
 		Name: "ruby",
 	}
 
-	tag2 := &Tag{
+	tag2 := Tag{
 		Name: "rails",
 	}
 
 	tags, _, _ := tagSvc.List()
 
-	want := &[]Tag{*tag1, *tag2}
+	want := &TagListResponse{tag1, tag2}
 	if !reflect.DeepEqual(tags, want) {
 		t.Errorf("Users returned %+v, want %+v", tags, want)
 	}
