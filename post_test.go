@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func TestMemoService_Create(t *testing.T) {
+func TestPostService_Create(t *testing.T) {
 	setup()
 	defer teardown()
 
@@ -18,11 +18,11 @@ func TestMemoService_Create(t *testing.T) {
 		fmt.Fprint(w, testutil.LoadFixture(t, "post-detail-response.json"))
 	})
 
-	memoSrv := NewPostService(client)
+	postSrv := NewPostService(client)
 
 	mReq := &PostRequest{}
 
-	actual, _, err := memoSrv.Create(mReq)
+	actual, _, err := postSrv.Create(mReq)
 
 	if err != nil {
 		t.Errorf("Shouldn't have returned an error: %+v", err)
@@ -78,7 +78,7 @@ func TestMemoService_Create(t *testing.T) {
 	}
 }
 
-func TestMemoService_Get(t *testing.T) {
+func TestPostService_Get(t *testing.T) {
 
 	setup()
 	defer teardown()
@@ -89,7 +89,7 @@ func TestMemoService_Get(t *testing.T) {
 		t.Errorf("Fail to parse err: %v", err)
 	}
 
-	memo := &Post{
+	post := &Post{
 		ID:        1,
 		Title:     "メモのタイトル",
 		Body:      "メモの本文",
@@ -128,12 +128,12 @@ func TestMemoService_Get(t *testing.T) {
 		},
 	}
 
-	memoSvc := NewPostService(client)
+	postSvc := NewPostService(client)
 
-	mux.HandleFunc(fmt.Sprintf("/posts/%d", memo.ID), func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(fmt.Sprintf("/posts/%d", post.ID), func(w http.ResponseWriter, r *http.Request) {
 		//requestSent = true
 
-		u, _ := url.Parse(fmt.Sprintf("/posts/%d", memo.ID))
+		u, _ := url.Parse(fmt.Sprintf("/posts/%d", post.ID))
 
 		want := u.String()
 		if got := r.URL.String(); got != want {
@@ -143,18 +143,18 @@ func TestMemoService_Get(t *testing.T) {
 		fmt.Fprint(w, testutil.LoadFixture(t, "post-detail-response.json"))
 	})
 
-	getRes, _, err := memoSvc.Get(memo.ID)
+	getRes, _, err := postSvc.Get(post.ID)
 
 	if err != nil {
 		t.Errorf("Get returned an error: %v", err)
 	}
 
-	if !reflect.DeepEqual(getRes, memo) {
-		t.Errorf("Get returned %+v, want %+v", getRes, memo)
+	if !reflect.DeepEqual(getRes, post) {
+		t.Errorf("Get returned %+v, want %+v", getRes, post)
 	}
 }
 
-func TestMemoService_Update(t *testing.T) {
+func TestPostService_Update(t *testing.T) {
 	setup()
 	defer teardown()
 
@@ -164,7 +164,7 @@ func TestMemoService_Update(t *testing.T) {
 		t.Errorf("Fail to parse err: %v", err)
 	}
 
-	memo := &Post{
+	post := &Post{
 		ID:        1,
 		Title:     "メモのタイトル",
 		Body:      "メモの本文",
@@ -203,10 +203,10 @@ func TestMemoService_Update(t *testing.T) {
 		},
 	}
 
-	memoSvc := NewPostService(client)
+	postSvc := NewPostService(client)
 
-	mux.HandleFunc(fmt.Sprintf("/posts/%d", memo.ID), func(w http.ResponseWriter, r *http.Request) {
-		u, _ := url.Parse(fmt.Sprintf("/posts/%d", memo.ID))
+	mux.HandleFunc(fmt.Sprintf("/posts/%d", post.ID), func(w http.ResponseWriter, r *http.Request) {
+		u, _ := url.Parse(fmt.Sprintf("/posts/%d", post.ID))
 
 		want := u.String()
 		if got := r.URL.String(); got != want {
@@ -219,29 +219,29 @@ func TestMemoService_Update(t *testing.T) {
 	// TDOO どんなリクエストボディでも固定レスポンス返してしまうので、検証はさみたい
 	mReq := &PostRequest{}
 
-	res, _, err := memoSvc.Update(memo.ID, mReq)
+	res, _, err := postSvc.Update(post.ID, mReq)
 
 	if err != nil {
 		t.Errorf("Get returned an error: %v", err)
 	}
 
-	if !reflect.DeepEqual(res, memo) {
-		t.Errorf("Get returned %+v, want %+v", res, memo)
+	if !reflect.DeepEqual(res, post) {
+		t.Errorf("Get returned %+v, want %+v", res, post)
 	}
 }
 
-func TestMemoService_Archive(t *testing.T) {
+func TestPostService_Archive(t *testing.T) {
 	setup()
 	defer teardown()
 
-	memo := &Post{
+	post := &Post{
 		ID: 1,
 	}
 
-	memoSvc := NewPostService(client)
+	postSvc := NewPostService(client)
 
-	mux.HandleFunc(fmt.Sprintf("/posts/%d/archive", memo.ID), func(w http.ResponseWriter, r *http.Request) {
-		u, _ := url.Parse(fmt.Sprintf("/posts/%d/archive", memo.ID))
+	mux.HandleFunc(fmt.Sprintf("/posts/%d/archive", post.ID), func(w http.ResponseWriter, r *http.Request) {
+		u, _ := url.Parse(fmt.Sprintf("/posts/%d/archive", post.ID))
 
 		want := u.String()
 		if got := r.URL.String(); got != want {
@@ -251,25 +251,25 @@ func TestMemoService_Archive(t *testing.T) {
 		fmt.Fprint(w, `{}`)
 	})
 
-	_, err := memoSvc.Archive(memo.ID)
+	_, err := postSvc.Archive(post.ID)
 
 	if err != nil {
 		t.Errorf("Archive returned an error: %v", err)
 	}
 }
 
-func TestMemoService_Unarchive(t *testing.T) {
+func TestPostService_Unarchive(t *testing.T) {
 	setup()
 	defer teardown()
 
-	memo := &Post{
+	post := &Post{
 		ID: 1,
 	}
 
-	memoSvc := NewPostService(client)
+	postSvc := NewPostService(client)
 
-	mux.HandleFunc(fmt.Sprintf("/posts/%d/unarchive", memo.ID), func(w http.ResponseWriter, r *http.Request) {
-		u, _ := url.Parse(fmt.Sprintf("/posts/%d/unarchive", memo.ID))
+	mux.HandleFunc(fmt.Sprintf("/posts/%d/unarchive", post.ID), func(w http.ResponseWriter, r *http.Request) {
+		u, _ := url.Parse(fmt.Sprintf("/posts/%d/unarchive", post.ID))
 
 		want := u.String()
 		if got := r.URL.String(); got != want {
@@ -279,7 +279,7 @@ func TestMemoService_Unarchive(t *testing.T) {
 		fmt.Fprint(w, `{}`)
 	})
 
-	_, err := memoSvc.Unarchive(memo.ID)
+	_, err := postSvc.Unarchive(post.ID)
 
 	if err != nil {
 		t.Errorf("Unarchive returned an error: %v", err)

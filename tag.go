@@ -15,12 +15,12 @@ type Tag struct {
 
 type TagListResponse []Tag
 
-func NewTagService(client *Client) *TagService {
-	return &TagService{client: client}
-}
-
 func (s *TagService) List() (*TagListResponse, *http.Response, error) {
 	u, err := url.Parse("/tags")
+
+	if err != nil {
+		return nil, nil, err
+	}
 
 	req, err := s.client.NewRequest(http.MethodGet, u.String(), nil)
 
@@ -31,4 +31,8 @@ func (s *TagService) List() (*TagListResponse, *http.Response, error) {
 	}
 
 	return tagResp, resp, err
+}
+
+func NewTagService(client *Client) *TagService {
+	return &TagService{client: client}
 }

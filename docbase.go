@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"strings"
 )
@@ -13,8 +15,13 @@ import (
 const (
 	defaultBaseURL = "https://api.docbase.io/teams/%s"
 	apiVersion     = "2"
-	//TODO Add user_agent like docbase ruby gem
-	//USER_AGENT = "DocBase Go #{DocBase::VERSION}"
+	userAgent = "DocBase Go %s"
+)
+
+const (
+	publicScope = "public"
+	groupScope = "group"
+	privateScope = "private"
 )
 
 type Client struct {
@@ -28,10 +35,7 @@ type Client struct {
 	Groups   *GroupService
 	Tags     *TagService
 	Comments *CommentService
-}
-
-type Service struct {
-	client *Client
+	Attachments *AttachmentService
 }
 
 type ErrorResponse struct {
@@ -72,6 +76,7 @@ func NewClient(httpClient *http.Client, team, token string, opts ...Option) *Cli
 	cli.Users = NewUserService(cli)
 	cli.Comments = NewCommentService(cli)
 	cli.Tags = NewTagService(cli)
+	cli.Attachments = NewAttachmentService(cli)
 
 	return cli
 }
@@ -98,15 +103,20 @@ func (c *Client) NewRequest(method, path string, body interface{}) (*http.Reques
 		return nil, err
 	}
 
+	//hoge := strings.NewReader(buf)
 	req, err := http.NewRequest(method, u.String(), bytes.NewBuffer(buf))
+	dump, _ := httputil.DumpRequest(req, true)
+	fmt.Printf("dump is %q", dump)
 
 	if err != nil {
 		return nil, err
 	}
 
+	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("X-DocBaseToken", c.AccessToken)
 	req.Header.Add("X-Api-Version", apiVersion)
+	req.Header.Add("USER_AGENT", userAgent)
 
 	return req, nil
 }
@@ -125,18 +135,41 @@ func (c *Client) Do(r *http.Request, v interface{}) (*http.Response, error) {
 		return resp, err
 	}
 
-	dec := json.NewDecoder(resp.Body)
+	err = json.NewDecoder(resp.Body).Decode(&v)
 
-	err = dec.Decode(&v)
 	if err != nil {
 		return resp, err
 	}
 	return resp, nil
 }
 
+func (c *Client) DoBinary(r *http.Request) (FileContent, *http.Response, error) {
+	resp, err := c.Client.Do(r)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	defer resp.Body.Close()
+
+	err = CheckResponse(resp)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		return nil, resp, err
+	}
+	return body, resp, nil
+}
+
 func CheckResponse(r *http.Response) error {
 	switch r.StatusCode {
 	case http.StatusOK:
+		return nil
+	case http.StatusCreated:
 		return nil
 	case http.StatusInternalServerError:
 		return &ErrorResponse{
