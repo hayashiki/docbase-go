@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/http/httputil"
 	"net/url"
 	"strings"
 )
@@ -105,8 +104,6 @@ func (c *Client) NewRequest(method, path string, body interface{}) (*http.Reques
 
 	//hoge := strings.NewReader(buf)
 	req, err := http.NewRequest(method, u.String(), bytes.NewBuffer(buf))
-	dump, _ := httputil.DumpRequest(req, true)
-	fmt.Printf("dump is %q", dump)
 
 	if err != nil {
 		return nil, err
