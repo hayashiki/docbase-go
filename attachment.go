@@ -15,21 +15,27 @@ type File struct {
 	Content string `json:"content"`
 }
 
-func (f *File) Encode(filePath string) {
+func (f *File) Encode(filePath string) error {
 	file, err := os.Open(filePath)
+	defer file.Close()
 
 	if err != nil {
-		panic(err)
+		return err
 	}
-	defer file.Close()
 
 	f.Name = file.Name()
 	fi, _ := file.Stat()
 	size := fi.Size()
 	data := make([]byte, size)
-	file.Read(data)
+	_, err = file.Read(data)
+
+	if err != nil {
+		return err
+	}
 
 	f.Content = base64.StdEncoding.EncodeToString(data)
+
+	return nil
 }
 
 type AttachmentService struct {
@@ -53,7 +59,7 @@ type Request struct {
 	ID string
 }
 
-func (s *AttachmentService) Download(attachmentID string) (*FileContent, *http.Response, error) {
+func (s *AttachmentService) Download(attachmentID string) (*FileContent, *Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/attachments/%s", attachmentID))
 
 	if err != nil {
@@ -66,7 +72,7 @@ func (s *AttachmentService) Download(attachmentID string) (*FileContent, *http.R
 		return nil, nil, err
 	}
 
-	fileResp, resp, err := s.client.DoBinary(req)
+	fileResp, resp, err := s.client.DoUpload(req)
 
 	if err != nil {
 		return nil, resp, err
@@ -75,13 +81,18 @@ func (s *AttachmentService) Download(attachmentID string) (*FileContent, *http.R
 	return &fileResp, resp, nil
 }
 
-func (s *AttachmentService) Upload(filesPath []string) (*AttachmentResponse, *http.Response, error) {
+func (s *AttachmentService) Upload(filesPath []string) (*AttachmentResponse, *Response, error) {
 
 	var files []File
-	var file File
 
 	for _, fp := range filesPath {
-		file.Encode(fp)
+		var file File
+		err := file.Encode(fp)
+
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed read file err: %w", err)
+		}
+
 		files = append(files, file)
 	}
 

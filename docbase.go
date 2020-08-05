@@ -8,13 +8,20 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
+	"time"
 )
 
 const (
 	defaultBaseURL = "https://api.docbase.io/teams/%s"
 	apiVersion     = "2"
 	userAgent = "DocBase Go %s"
+
+	// https://help.docbase.io/posts/45703#利用制限
+	headerRateLimit     = "X-RateLimit-Limit"
+	headerRateRemaining = "X-RateLimit-Remaining"
+	headerRateReset     = "X-RateLimit-Reset"
 )
 
 const (
@@ -35,6 +42,60 @@ type Client struct {
 	Tags     *TagService
 	Comments *CommentService
 	Attachments *AttachmentService
+}
+
+// Response is http response wrapper for Dobase
+type Response struct {
+	*http.Response
+	Rate
+}
+
+func newResponse(r *http.Response) *Response {
+	res := &Response{Response: r}
+	res.Rate = parseRate(r)
+	return res
+}
+
+func parseRate(r *http.Response) Rate {
+	var (
+		rate Rate
+		err  error
+	)
+
+	if limit := r.Header.Get(headerRateLimit); limit != "" {
+		rate.Limit, err = strconv.Atoi(limit)
+		if err != nil {
+			rate.err = err
+		}
+	}
+	if remaining := r.Header.Get(headerRateRemaining); remaining != "" {
+		rate.Remaining, err = strconv.Atoi(remaining)
+		if err != nil {
+			rate.err = err
+		}
+	}
+	if reset := r.Header.Get(headerRateReset); reset != "" {
+		v, e := strconv.ParseInt(reset, 10, 64)
+		if e != nil {
+			rate.err = e
+		} else if v != 0 {
+			//rate.Reset = Timestamp{time.Unix(v, 0)}
+		}
+	}
+	return rate
+}
+
+type Rate struct {
+	// The number of requests per hour the client is currently limited to.
+	Limit int `json:"limit"`
+
+	// The number of remaining requests the client can make this hour.
+	Remaining int `json:"remaining"`
+
+	// The time at which the current rate limit will reset.
+	Reset time.Time `json:"reset"`
+
+	err error
 }
 
 type ErrorResponse struct {
@@ -118,7 +179,7 @@ func (c *Client) NewRequest(method, path string, body interface{}) (*http.Reques
 	return req, nil
 }
 
-func (c *Client) Do(r *http.Request, v interface{}) (*http.Response, error) {
+func (c *Client) Do(r *http.Request, v interface{}) (*Response, error) {
 	resp, err := c.Client.Do(r)
 
 	if err != nil {
@@ -127,20 +188,23 @@ func (c *Client) Do(r *http.Request, v interface{}) (*http.Response, error) {
 
 	defer resp.Body.Close()
 
+
+	response := newResponse(resp)
+
 	err = CheckResponse(resp)
 	if err != nil {
-		return resp, err
+		return response, err
 	}
 
 	err = json.NewDecoder(resp.Body).Decode(&v)
 
 	if err != nil {
-		return resp, err
+		return response, err
 	}
-	return resp, nil
+	return response, nil
 }
 
-func (c *Client) DoBinary(r *http.Request) (FileContent, *http.Response, error) {
+func (c *Client) DoUpload(r *http.Request) (FileContent, *Response, error) {
 	resp, err := c.Client.Do(r)
 
 	if err != nil {
@@ -149,17 +213,19 @@ func (c *Client) DoBinary(r *http.Request) (FileContent, *http.Response, error) 
 
 	defer resp.Body.Close()
 
+	response := newResponse(resp)
+
 	err = CheckResponse(resp)
 	if err != nil {
-		return nil, resp, err
+		return nil, response, err
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 
 	if err != nil {
-		return nil, resp, err
+		return nil, response, err
 	}
-	return body, resp, nil
+	return body, response, nil
 }
 
 func CheckResponse(r *http.Response) error {

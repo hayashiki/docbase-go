@@ -13,13 +13,24 @@ func TestAttachmentService_Download(t *testing.T) {
 	setup()
 	defer teardown()
 
-	mux.HandleFunc("/attachments", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, testutil.LoadFixture(t, "attachment-list-response.json"))
+	ti, err := time.Parse(time.RFC3339, "2020-03-27T09:25:09+09:00")
+
+	att1 := Attachment{
+		ID:        "fd26b8c9-0c55-48e7-a943-87292acd5682.png",
+		Name:      "image1.png",
+		Size:      132323,
+		URL:       "https://image.docbase.io/uploads/fd26b8c9-0c55-48e7-a943-87292acd5682.png",
+		Markdown:  "![image.png](https://image.docbase.io/uploads/fd26b8c9-0c55-48e7-a943-87292acd5682.png)",
+		CreatedAt: ti,
+	}
+
+	mux.HandleFunc(fmt.Sprintf("/attachments/%s", att1.ID), func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, `{}`)
 	})
 
 	attSvc := AttachmentService{client}
 
-	_, _, err := attSvc.Download("fd26b8c9-0c55-48e7-a943-87292acd5682.png")
+	_, _, err = attSvc.Download("fd26b8c9-0c55-48e7-a943-87292acd5682.png")
 
 	if err != nil {
 		t.Errorf("Shouldn't have returned an error: %+v", err)

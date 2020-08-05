@@ -49,7 +49,7 @@ type GroupRequest struct {
 
 type GroupListResponse []SimpleGroup
 
-func (s *GroupService) List(opts *GroupListOptions) (*GroupListResponse, *http.Response, error) {
+func (s *GroupService) List(opts *GroupListOptions) (*GroupListResponse, *Response, error) {
 	u, err := url.Parse("/groups")
 
 	if err != nil {
@@ -78,10 +78,9 @@ func (s *GroupService) List(opts *GroupListOptions) (*GroupListResponse, *http.R
 
 }
 
-func (s *GroupService) Get(id int) (*Group, *http.Response, error) {
+// Get a single group
+func (s *GroupService) Get(id int) (*Group, *Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/groups/%d", id))
-
-	//	TODO: return if not have scope permission
 
 	if err != nil {
 		return nil, nil, err
@@ -103,7 +102,7 @@ func (s *GroupService) Get(id int) (*Group, *http.Response, error) {
 	return res, resp, err
 }
 
-func (s *GroupService) AddUser(id int, gReq *GroupAddRequest) (*http.Response, error) {
+func (s *GroupService) AddUser(id int, gReq *GroupAddRequest) (*Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/groups/%d/users", id))
 
 	if err != nil {
@@ -125,7 +124,7 @@ func (s *GroupService) AddUser(id int, gReq *GroupAddRequest) (*http.Response, e
 	return resp, err
 }
 
-func (s *GroupService) RemoveUser(id int, gReq *GroupAddRequest) (*http.Response, error) {
+func (s *GroupService) RemoveUser(id int, gReq *GroupAddRequest) (*Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/groups/%d/users", id))
 
 	if err != nil {

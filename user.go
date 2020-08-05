@@ -1,7 +1,6 @@
 package docbase
 
 import (
-	"net/http"
 	"net/url"
 	"strconv"
 	"time"
@@ -45,7 +44,7 @@ type UserListOptions struct {
 	PerPage int
 }
 
-func (s *UserService) List(opts *UserListOptions) (*UserListResponse, *http.Response, error) {
+func (s *UserService) List(opts *UserListOptions) (*UserListResponse, *Response, error) {
 	u, err := url.Parse("/users")
 
 	if err != nil {

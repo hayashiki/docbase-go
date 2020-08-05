@@ -72,7 +72,7 @@ type PostAttachment struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-func (s *PostService) List(opts *PostListOptions) (*PostListResponse, *http.Response, error) {
+func (s *PostService) List(opts *PostListOptions) (*PostListResponse, *Response, error) {
 
 	u, err := url.Parse("/posts")
 
@@ -101,7 +101,7 @@ func (s *PostService) List(opts *PostListOptions) (*PostListResponse, *http.Resp
 	return mResp, resp, err
 }
 
-func (s *PostService) Create(memoReq *PostRequest) (*Post, *http.Response, error) {
+func (s *PostService) Create(memoReq *PostRequest) (*Post, *Response, error) {
 	u, err := url.Parse("/posts")
 
 	if err != nil {
@@ -124,7 +124,7 @@ func (s *PostService) Create(memoReq *PostRequest) (*Post, *http.Response, error
 	return mResp, resp, err
 }
 
-func (s *PostService) Get(memoID int) (*Post, *http.Response, error) {
+func (s *PostService) Get(memoID int) (*Post, *Response, error) {
 
 	u, err := url.Parse(fmt.Sprintf("/posts/%d", memoID))
 
@@ -148,7 +148,7 @@ func (s *PostService) Get(memoID int) (*Post, *http.Response, error) {
 	return mResp, resp, err
 }
 
-func (s *PostService) Update(memoID int, memoReq *PostRequest) (*Post, *http.Response, error) {
+func (s *PostService) Update(memoID int, memoReq *PostRequest) (*Post, *Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%d", memoID))
 	if err != nil {
 		return nil, nil, err
@@ -173,7 +173,7 @@ func (s *PostService) Update(memoID int, memoReq *PostRequest) (*Post, *http.Res
 	return mResp, resp, err
 }
 
-func (s *PostService) Delete(memoID string) (*http.Response, error) {
+func (s *PostService) Delete(memoID string) (*Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%s", memoID))
 	if err != nil {
 		return nil, err
@@ -193,7 +193,7 @@ func (s *PostService) Delete(memoID string) (*http.Response, error) {
 	return resp, err
 }
 
-func (s *PostService) Archive(memoID int) (*http.Response, error) {
+func (s *PostService) Archive(memoID int) (*Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%d/archive", memoID))
 	if err != nil {
 		return nil, err
@@ -217,7 +217,7 @@ func (s *PostService) Archive(memoID int) (*http.Response, error) {
 	return resp, err
 }
 
-func (s *PostService) Unarchive(memoID int) (*http.Response, error) {
+func (s *PostService) Unarchive(memoID int) (*Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%d/unarchive", memoID))
 	if err != nil {
 		return nil, err

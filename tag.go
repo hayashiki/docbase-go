@@ -15,7 +15,7 @@ type Tag struct {
 
 type TagListResponse []Tag
 
-func (s *TagService) List() (*TagListResponse, *http.Response, error) {
+func (s *TagService) List() (*TagListResponse, *Response, error) {
 	u, err := url.Parse("/tags")
 
 	if err != nil {
