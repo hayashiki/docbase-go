@@ -32,7 +32,7 @@ type CommentResponse struct {
 	Body string `json:"body"`
 }
 
-func (s *CommentService) Create(postID int, cReq *CommentRequest) (*CommentResponse, *http.Response, error) {
+func (s *CommentService) Create(postID int, cReq *CommentRequest) (*CommentResponse, *Response, error) {
 
 	u, err := url.Parse(fmt.Sprintf("/posts/%d/comments", postID))
 
@@ -55,7 +55,7 @@ func (s *CommentService) Create(postID int, cReq *CommentRequest) (*CommentRespo
 	return cResp, resp, err
 }
 
-func (s *CommentService) Delete(commentID int) (*http.Response, error) {
+func (s *CommentService) Delete(commentID int) (*Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/comments/%d", commentID))
 
 	if err != nil {

@@ -14,7 +14,7 @@ func TestAttachmentService_Download(t *testing.T) {
 	defer teardown()
 
 	mux.HandleFunc("/attachments", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, testutil.LoadFixture(t, "attachment-list-response.json"))
+		fmt.Fprint(w, `{}`)
 	})
 
 	attSvc := AttachmentService{client}
