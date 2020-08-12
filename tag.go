@@ -5,17 +5,25 @@ import (
 	"net/url"
 )
 
-type TagService struct {
+// TagService implements interface with API /tags endpoint.
+// See https://help.docbase.io/posts/45703#%E3%82%BF%E3%82%B0
+type TagService interface {
+	List() (*TagListResponse, *Response, error)
+}
+
+// TagCli handles communication with API
+type TagCli struct {
 	client *Client
 }
 
+// Tag represents a docbase Tag
 type Tag struct {
 	Name string `json:"name"`
 }
 
 type TagListResponse []Tag
 
-func (s *TagService) List() (*TagListResponse, *Response, error) {
+func (s *TagCli) List() (*TagListResponse, *Response, error) {
 	u, err := url.Parse("/tags")
 
 	if err != nil {
@@ -33,6 +41,6 @@ func (s *TagService) List() (*TagListResponse, *Response, error) {
 	return tagResp, resp, err
 }
 
-func NewTagService(client *Client) *TagService {
-	return &TagService{client: client}
+func NewTagService(client *Client) *TagCli {
+	return &TagCli{client: client}
 }

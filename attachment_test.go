@@ -28,7 +28,7 @@ func TestAttachmentService_Download(t *testing.T) {
 		fmt.Fprint(w, `{}`)
 	})
 
-	attSvc := AttachmentService{client}
+	attSvc := AttachmentCli{client}
 
 	_, _, err = attSvc.Download("fd26b8c9-0c55-48e7-a943-87292acd5682.png")
 
@@ -45,7 +45,7 @@ func TestAttachmentService_Upload(t *testing.T) {
 		fmt.Fprint(w, testutil.LoadFixture(t, "attachment-list-response.json"))
 	})
 
-	attSvc := AttachmentService{client}
+	attSvc := AttachmentCli{client}
 
 	atts, _, err := attSvc.Upload([]string{"./testdata/image1.jpg", "./testdata/image2.jpg"})
 

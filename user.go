@@ -6,10 +6,18 @@ import (
 	"time"
 )
 
-type UserService struct {
+// UserService implements interface with API /posts endpoint.
+// See https://help.docbase.io/posts/45703#%E3%83%81%E3%83%BC%E3%83%A0
+type UserService interface {
+	List(opts *UserListOptions) (*UserListResponse, *Response, error)
+}
+
+// UserCli handles communication with API
+type UserCli struct {
 	client *Client
 }
 
+// User represents a docbase User
 type User struct {
 	ID                    int           `json:"id"`
 	Name                  string        `json:"name"`
@@ -44,7 +52,7 @@ type UserListOptions struct {
 	PerPage int
 }
 
-func (s *UserService) List(opts *UserListOptions) (*UserListResponse, *Response, error) {
+func (s *UserCli) List(opts *UserListOptions) (*UserListResponse, *Response, error) {
 	u, err := url.Parse("/users")
 
 	if err != nil {
@@ -71,6 +79,6 @@ func (s *UserService) List(opts *UserListOptions) (*UserListResponse, *Response,
 	return userResp, resp, err
 }
 
-func NewUserService(client *Client) *UserService {
-	return &UserService{client: client}
+func NewUserService(client *Client) *UserCli {
+	return &UserCli{client: client}
 }
