@@ -38,7 +38,8 @@ type Client struct {
 
 	Posts       *PostService
 	Users       *UserService
-	Groups      *GroupCli
+	Groups      GroupService
+	GroupUsers  GroupUserService
 	Tags        *TagService
 	Comments    *CommentService
 	Attachments *AttachmentService
@@ -138,6 +139,7 @@ func NewClient(httpClient *http.Client, team, token string, opts ...Option) *Cli
 	cli.Comments = NewCommentService(cli)
 	cli.Tags = NewTagService(cli)
 	cli.Attachments = NewAttachmentService(cli)
+	cli.GroupUsers = &GroupUserCli{cli}
 
 	return cli
 }

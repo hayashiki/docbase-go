@@ -14,9 +14,6 @@ type GroupService interface {
 	List(opts *GroupListOptions) (*GroupListResponse, *Response, error)
 	Get(id int) (*Group, *Response, error)
 	Create(createRequest *GroupCreateRequest) (*Group, *Response, error)
-	// TODO: create group users file
-	AddUser(id int, gReq *GroupAddRequest) (*Response, error)
-	RemoveUser(id int, gReq *GroupAddRequest) (*Response, error)
 }
 
 // GroupCli handles communication with API
@@ -41,10 +38,6 @@ type Group struct {
 	Users          []SimpleUser `json:"users"`
 }
 
-type GroupAddRequest struct {
-	UserIDs []int `json:"user_ids"`
-}
-
 // GroupListOptions identifies as query params of List request
 type GroupListOptions struct {
 	Name    string `url:"name,omitempty"`
@@ -53,13 +46,8 @@ type GroupListOptions struct {
 }
 
 type GroupCreateRequest struct {
-	Name  string `json:"name"`
-	Description   string `json:"description"`
-	//Draft  bool   `json:"draft"`  // optional, default: false
-	//Notice bool   `json:"notice"` // optional, default: true
-	//Tags   []string
-	//Scope  string `json:"scope"` // optional, default: everyone
-	//Groups []string
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 // GroupListResponse represents a List simple group
@@ -139,50 +127,6 @@ func (s *GroupCli) Create(createRequest *GroupCreateRequest) (*Group, *Response,
 	}
 
 	return cResp, resp, err
-}
-
-func (s *GroupCli) AddUser(id int, gReq *GroupAddRequest) (*Response, error) {
-	u, err := url.Parse(fmt.Sprintf("/groups/%d/users", id))
-
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := s.client.NewRequest(http.MethodPost, u.String(), gReq)
-
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := s.client.Do(req, nil)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return resp, err
-}
-
-func (s *GroupCli) RemoveUser(id int, gReq *GroupAddRequest) (*Response, error) {
-	u, err := url.Parse(fmt.Sprintf("/groups/%d/users", id))
-
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := s.client.NewRequest(http.MethodDelete, u.String(), gReq)
-
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := s.client.Do(req, nil)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return resp, err
 }
 
 func NewGroupService(client *Client) *GroupCli {
