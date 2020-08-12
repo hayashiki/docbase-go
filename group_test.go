@@ -82,6 +82,33 @@ func TestGroupService_Get(t *testing.T) {
 	}
 }
 
+func TestGroupCli_Create(t *testing.T) {
+	setup()
+	defer teardown()
+
+	groupSvc := NewGroupService(client)
+
+	createReqest := &GroupCreateRequest{
+		Name: "DocBase",
+		Description:   "DocBase",
+	}
+
+	mux.HandleFunc("/groups", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, `{}`)
+	})
+
+	_, resp, err := groupSvc.Create(createReqest)
+
+	if err != nil {
+		t.Errorf("Fail to create group request err: %v", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Create group response code = %v, expected %v", resp.StatusCode, http.StatusOK)
+	}
+
+}
+
 func TestGroupService_AddUser(t *testing.T) {
 	setup()
 	defer teardown()

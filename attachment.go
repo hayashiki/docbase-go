@@ -9,9 +9,8 @@ import (
 	"time"
 )
 
-
 type File struct {
-	Name string `json:"name"`
+	Name    string `json:"name"`
 	Content string `json:"content"`
 }
 
@@ -43,7 +42,7 @@ type AttachmentService struct {
 }
 
 type Attachment struct {
-	ID        string       `json:"id"`
+	ID        string    `json:"id"`
 	Name      string    `json:"name"`
 	Size      int       `json:"size"`
 	URL       string    `json:"url"`
@@ -121,4 +120,3 @@ func (s *AttachmentService) Upload(filesPath []string) (*AttachmentResponse, *Re
 func NewAttachmentService(client *Client) *AttachmentService {
 	return &AttachmentService{client: client}
 }
-

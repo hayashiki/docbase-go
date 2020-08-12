@@ -8,15 +8,29 @@ import (
 	"time"
 )
 
-type GroupService struct {
+// GroupService implements interface with API /groups endpoint.
+// See https://help.docbase.io/posts/45703#%E3%82%B0%E3%83%AB%E3%83%BC%E3%83%97
+type GroupService interface {
+	List(opts *GroupListOptions) (*GroupListResponse, *Response, error)
+	Get(id int) (*Group, *Response, error)
+	Create(createRequest *GroupCreateRequest) (*Group, *Response, error)
+	// TODO: create group users file
+	AddUser(id int, gReq *GroupAddRequest) (*Response, error)
+	RemoveUser(id int, gReq *GroupAddRequest) (*Response, error)
+}
+
+// GroupCli handles communication with API
+type GroupCli struct {
 	client *Client
 }
 
+// Group represents a minimum group Object
 type SimpleGroup struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
 }
 
+// Group represents a group Object
 type Group struct {
 	ID             int          `json:"id"`
 	Name           string       `json:"name"`
@@ -31,25 +45,28 @@ type GroupAddRequest struct {
 	UserIDs []int `json:"user_ids"`
 }
 
+// GroupListOptions identifies as query params of List request
 type GroupListOptions struct {
-	Name    string
-	Page    int
-	PerPage int
+	Name    string `url:"name,omitempty"`
+	Page    int    `url:"page,omitempty"`
+	PerPage int    `url:"per_page,omitempty"`
 }
 
-type GroupRequest struct {
-	Title  string `json:"title"`
-	Body   string `json:"body"`
-	Draft  bool   `json:"draft"`  // optional, default: false
-	Notice bool   `json:"notice"` // optional, default: true
-	Tags   []string
-	Scope  string `json:"scope"` // optional, default: everyone
-	Groups []string
+type GroupCreateRequest struct {
+	Name  string `json:"name"`
+	Description   string `json:"description"`
+	//Draft  bool   `json:"draft"`  // optional, default: false
+	//Notice bool   `json:"notice"` // optional, default: true
+	//Tags   []string
+	//Scope  string `json:"scope"` // optional, default: everyone
+	//Groups []string
 }
 
+// GroupListResponse represents a List simple group
 type GroupListResponse []SimpleGroup
 
-func (s *GroupService) List(opts *GroupListOptions) (*GroupListResponse, *Response, error) {
+// List Group
+func (s *GroupCli) List(opts *GroupListOptions) (*GroupListResponse, *Response, error) {
 	u, err := url.Parse("/groups")
 
 	if err != nil {
@@ -75,11 +92,10 @@ func (s *GroupService) List(opts *GroupListOptions) (*GroupListResponse, *Respon
 	}
 
 	return res, resp, err
-
 }
 
-// Get a single group
-func (s *GroupService) Get(id int) (*Group, *Response, error) {
+// Get Group
+func (s *GroupCli) Get(id int) (*Group, *Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/groups/%d", id))
 
 	if err != nil {
@@ -102,7 +118,30 @@ func (s *GroupService) Get(id int) (*Group, *Response, error) {
 	return res, resp, err
 }
 
-func (s *GroupService) AddUser(id int, gReq *GroupAddRequest) (*Response, error) {
+// Create Group
+func (s *GroupCli) Create(createRequest *GroupCreateRequest) (*Group, *Response, error) {
+	u, err := url.Parse("/groups")
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	req, err := s.client.NewRequest(http.MethodPost, u.String(), createRequest)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	cResp := &Group{}
+	resp, err := s.client.Do(req, cResp)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return cResp, resp, err
+}
+
+func (s *GroupCli) AddUser(id int, gReq *GroupAddRequest) (*Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/groups/%d/users", id))
 
 	if err != nil {
@@ -124,7 +163,7 @@ func (s *GroupService) AddUser(id int, gReq *GroupAddRequest) (*Response, error)
 	return resp, err
 }
 
-func (s *GroupService) RemoveUser(id int, gReq *GroupAddRequest) (*Response, error) {
+func (s *GroupCli) RemoveUser(id int, gReq *GroupAddRequest) (*Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/groups/%d/users", id))
 
 	if err != nil {
@@ -146,6 +185,6 @@ func (s *GroupService) RemoveUser(id int, gReq *GroupAddRequest) (*Response, err
 	return resp, err
 }
 
-func NewGroupService(client *Client) *GroupService {
-	return &GroupService{client: client}
+func NewGroupService(client *Client) *GroupCli {
+	return &GroupCli{client: client}
 }
