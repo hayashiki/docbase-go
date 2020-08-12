@@ -128,7 +128,3 @@ func (s *GroupCli) Create(createRequest *GroupCreateRequest) (*Group, *Response,
 
 	return cResp, resp, err
 }
-
-func NewGroupService(client *Client) *GroupCli {
-	return &GroupCli{client: client}
-}

@@ -1,6 +1,7 @@
 package docbase
 
 import (
+	"net/http"
 	"net/url"
 	"strconv"
 	"time"
@@ -38,20 +39,15 @@ type SimpleUser struct {
 
 type UserListResponse []User
 
-//curl \
-//  -H 'X-DocBaseToken: ACCESS TOKEN' \
-//  https://api.docbase.io/teams/kray/users?include_user_groups=true
-//q	ユーザ名もしくはユーザIDの一部	String
-//page	ページ番号	Integer		1
-//per_page	1ページのユーザ数	Integer		100	100
-//include_user_groups ※	ユーザの所属グループを含めるかどうか	Boolean		false
-
+// UserListOptions identifies as query params of User List request
 type UserListOptions struct {
-	Q       string
-	Page    int
-	PerPage int
+	Q                 string `url:"q,omitempty"`
+	Page              int    `url:"page,omitempty"`
+	PerPage           int    `url:"per_page,omitempty"`
+	IncludeUserGroups bool   `url:"include_user_groups,omitempty"`
 }
 
+// List User
 func (s *UserCli) List(opts *UserListOptions) (*UserListResponse, *Response, error) {
 	u, err := url.Parse("/users")
 
@@ -63,8 +59,9 @@ func (s *UserCli) List(opts *UserListOptions) (*UserListResponse, *Response, err
 	q.Set("per_page", strconv.Itoa(opts.PerPage))
 	q.Set("page", strconv.Itoa(opts.Page))
 	q.Set("q", opts.Q)
+	q.Set("include_user_groups", opts.Q)
 
-	req, err := s.client.NewRequest("GET", u.String(), nil)
+	req, err := s.client.NewRequest(http.MethodGet, u.String(), nil)
 
 	if err != nil {
 		return nil, nil, err
@@ -77,8 +74,4 @@ func (s *UserCli) List(opts *UserListOptions) (*UserListResponse, *Response, err
 	}
 
 	return userResp, resp, err
-}
-
-func NewUserService(client *Client) *UserCli {
-	return &UserCli{client: client}
 }

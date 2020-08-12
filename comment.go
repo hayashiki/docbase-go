@@ -4,42 +4,39 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 // CommentService implements interface with API /groups endpoint.
 // https://help.docbase.io/posts/45703#%E3%82%B3%E3%83%A1%E3%83%B3%E3%83%88
 type CommentService interface {
-	Create(postID int, commentRequest *CommentRequest) (*CommentResponse, *Response, error)
+	Create(postID int, commentRequest *CommentCreateRequest) (*Comment, *Response, error)
 	Delete(commentID int) (*Response, error)
 }
 
+// CommentCli handles communication with API
 type CommentCli struct {
 	client *Client
 }
 
-func NewCommentService(client *Client) *CommentCli {
-	return &CommentCli{
-		client: client,
-	}
-}
-
+// Post represents a docbase Comment
 type Comment struct {
-	ID     int
-	Body   string
-	Notice bool
-	//	author_id
-	//	published_at
+	ID         int       `json:"id"`
+	Body       string    `json:"body"`
+	CreatedAt  time.Time `json:"created_at"`
+	SimpleUser `json:"user"`
 }
 
-type CommentRequest struct {
-	Body string `json:"body"`
+// CommentCreateRequest identifies Comment for the Create request
+type CommentCreateRequest struct {
+	Body        string    `json:"body"`
+	Notice      bool      `json:"notice,omitempty"`
+	AuthorID    string    `json:"author_id,omitempty"`
+	PublishedAt time.Time `json:"published_at,omitempty"`
 }
 
-type CommentResponse struct {
-	Body string `json:"body"`
-}
-
-func (s *CommentCli) Create(postID int, cReq *CommentRequest) (*CommentResponse, *Response, error) {
+// Create Comment
+func (s *CommentCli) Create(postID int, commentRequest *CommentCreateRequest) (*Comment, *Response, error) {
 
 	u, err := url.Parse(fmt.Sprintf("/posts/%d/comments", postID))
 
@@ -47,13 +44,13 @@ func (s *CommentCli) Create(postID int, cReq *CommentRequest) (*CommentResponse,
 		return nil, nil, err
 	}
 
-	req, err := s.client.NewRequest(http.MethodPost, u.String(), cReq)
+	req, err := s.client.NewRequest(http.MethodPost, u.String(), commentRequest)
 
 	if err != nil {
 		return nil, nil, err
 	}
 
-	cResp := &CommentResponse{}
+	cResp := &Comment{}
 	resp, err := s.client.Do(req, cResp)
 	if err != nil {
 		return nil, resp, err
@@ -62,6 +59,7 @@ func (s *CommentCli) Create(postID int, cReq *CommentRequest) (*CommentResponse,
 	return cResp, resp, err
 }
 
+// Delete Comment
 func (s *CommentCli) Delete(commentID int) (*Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/comments/%d", commentID))
 
@@ -75,7 +73,7 @@ func (s *CommentCli) Delete(commentID int) (*Response, error) {
 		return nil, err
 	}
 
-	cResp := &CommentResponse{}
+	cResp := &Comment{}
 	resp, err := s.client.Do(req, cResp)
 	if err != nil {
 		return resp, err

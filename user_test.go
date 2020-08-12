@@ -13,8 +13,6 @@ func TestUserService_List(t *testing.T) {
 	setup()
 	defer teardown()
 
-	userSvc := NewUserService(client)
-
 	mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, testutil.LoadFixture(t, "user-list-response.json"))
 	})
@@ -72,7 +70,15 @@ func TestUserService_List(t *testing.T) {
 		Q:       "query",
 	}
 
-	users, _, _ := userSvc.List(opts)
+	users, resp, err := client.Users.List(opts)
+
+	if err != nil {
+		t.Errorf("Shouldn't have returned an error: %+v", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("User Create request code = %v, expected %v", resp.StatusCode, http.StatusOK)
+	}
 
 	want := &UserListResponse{user1, user2, user3}
 	if !reflect.DeepEqual(users, want) {

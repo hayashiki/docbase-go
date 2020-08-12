@@ -40,7 +40,3 @@ func (s *TagCli) List() (*TagListResponse, *Response, error) {
 
 	return tagResp, resp, err
 }
-
-func NewTagService(client *Client) *TagCli {
-	return &TagCli{client: client}
-}

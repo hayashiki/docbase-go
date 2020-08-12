@@ -133,12 +133,12 @@ func NewClient(httpClient *http.Client, team, token string, opts ...Option) *Cli
 		cli.BaseURL = baseURL
 	}
 
-	cli.Posts = NewPostService(cli)
-	cli.Groups = NewGroupService(cli)
-	cli.Users = NewUserService(cli)
-	cli.Comments = NewCommentService(cli)
-	cli.Tags = NewTagService(cli)
-	cli.Attachments = NewAttachmentService(cli)
+	cli.Posts = &PostCli{cli}
+	cli.Groups = &GroupCli{cli}
+	cli.Users = &UserCli{cli}
+	cli.Comments = &CommentCli{cli}
+	cli.Tags = &TagCli{cli}
+	cli.Attachments = &AttachmentCli{cli}
 	cli.GroupUsers = &GroupUserCli{cli}
 
 	return cli
