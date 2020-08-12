@@ -121,7 +121,3 @@ func (s *AttachmentCli) Upload(filesPath []string) (*AttachmentResponse, *Respon
 
 	return atRes, resp, nil
 }
-
-func NewAttachmentService(client *Client) *AttachmentCli {
-	return &AttachmentCli{client: client}
-}

@@ -18,11 +18,9 @@ func TestPostService_Create(t *testing.T) {
 		fmt.Fprint(w, testutil.LoadFixture(t, "post-detail-response.json"))
 	})
 
-	postSrv := NewPostService(client)
+	mReq := &PostCreateRequest{}
 
-	mReq := &PostRequest{}
-
-	actual, _, err := postSrv.Create(mReq)
+	actual, _, err := client.Posts.Create(mReq)
 
 	if err != nil {
 		t.Errorf("Shouldn't have returned an error: %+v", err)
@@ -55,14 +53,14 @@ func TestPostService_Create(t *testing.T) {
 		},
 		StarsCount:    1,
 		GoodJobsCount: 2,
-		Comments:      []PostComment{},
+		Comments:      []Comment{},
 		Groups: []SimpleGroup{
 			SimpleGroup{
 				ID:   1,
 				Name: "DocBase",
 			},
 		},
-		Attachments: []PostAttachment{PostAttachment{
+		Attachments: []Attachment{Attachment{
 			ID:        "461d38b9-8c22-4222-a6a2-a6f2ce98ec3a.csv",
 			Name:      "uploadfile.csv",
 			Size:      18786,
@@ -110,14 +108,14 @@ func TestPostService_Get(t *testing.T) {
 		},
 		StarsCount:    1,
 		GoodJobsCount: 2,
-		Comments:      []PostComment{},
+		Comments:      []Comment{},
 		Groups: []SimpleGroup{
 			SimpleGroup{
 				ID:   1,
 				Name: "DocBase",
 			},
 		},
-		Attachments: []PostAttachment{PostAttachment{
+		Attachments: []Attachment{Attachment{
 			ID:        "461d38b9-8c22-4222-a6a2-a6f2ce98ec3a.csv",
 			Name:      "uploadfile.csv",
 			Size:      18786,
@@ -127,8 +125,6 @@ func TestPostService_Get(t *testing.T) {
 		},
 		},
 	}
-
-	postSvc := NewPostService(client)
 
 	mux.HandleFunc(fmt.Sprintf("/posts/%d", post.ID), func(w http.ResponseWriter, r *http.Request) {
 		//requestSent = true
@@ -143,7 +139,7 @@ func TestPostService_Get(t *testing.T) {
 		fmt.Fprint(w, testutil.LoadFixture(t, "post-detail-response.json"))
 	})
 
-	getRes, _, err := postSvc.Get(post.ID)
+	getRes, _, err := client.Posts.Get(post.ID)
 
 	if err != nil {
 		t.Errorf("Get returned an error: %v", err)
@@ -185,14 +181,14 @@ func TestPostService_Update(t *testing.T) {
 		},
 		StarsCount:    1,
 		GoodJobsCount: 2,
-		Comments:      []PostComment{},
+		Comments:      []Comment{},
 		Groups: []SimpleGroup{
 			SimpleGroup{
 				ID:   1,
 				Name: "DocBase",
 			},
 		},
-		Attachments: []PostAttachment{PostAttachment{
+		Attachments: []Attachment{Attachment{
 			ID:        "461d38b9-8c22-4222-a6a2-a6f2ce98ec3a.csv",
 			Name:      "uploadfile.csv",
 			Size:      18786,
@@ -202,8 +198,6 @@ func TestPostService_Update(t *testing.T) {
 		},
 		},
 	}
-
-	postSvc := NewPostService(client)
 
 	mux.HandleFunc(fmt.Sprintf("/posts/%d", post.ID), func(w http.ResponseWriter, r *http.Request) {
 		u, _ := url.Parse(fmt.Sprintf("/posts/%d", post.ID))
@@ -217,9 +211,9 @@ func TestPostService_Update(t *testing.T) {
 	})
 
 	// TDOO どんなリクエストボディでも固定レスポンス返してしまうので、検証はさみたい
-	mReq := &PostRequest{}
+	mReq := &PostUpdateRequest{}
 
-	res, _, err := postSvc.Update(post.ID, mReq)
+	res, _, err := client.Posts.Update(post.ID, mReq)
 
 	if err != nil {
 		t.Errorf("Get returned an error: %v", err)
@@ -238,8 +232,6 @@ func TestPostService_Archive(t *testing.T) {
 		ID: 1,
 	}
 
-	postSvc := NewPostService(client)
-
 	mux.HandleFunc(fmt.Sprintf("/posts/%d/archive", post.ID), func(w http.ResponseWriter, r *http.Request) {
 		u, _ := url.Parse(fmt.Sprintf("/posts/%d/archive", post.ID))
 
@@ -251,10 +243,14 @@ func TestPostService_Archive(t *testing.T) {
 		fmt.Fprint(w, `{}`)
 	})
 
-	_, err := postSvc.Archive(post.ID)
+	resp, err := client.Posts.Archive(post.ID)
 
 	if err != nil {
 		t.Errorf("Archive returned an error: %v", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Download.Create request code = %v, expected %v", resp.StatusCode, http.StatusOK)
 	}
 }
 
@@ -265,8 +261,6 @@ func TestPostService_Unarchive(t *testing.T) {
 	post := &Post{
 		ID: 1,
 	}
-
-	postSvc := NewPostService(client)
 
 	mux.HandleFunc(fmt.Sprintf("/posts/%d/unarchive", post.ID), func(w http.ResponseWriter, r *http.Request) {
 		u, _ := url.Parse(fmt.Sprintf("/posts/%d/unarchive", post.ID))
@@ -279,9 +273,13 @@ func TestPostService_Unarchive(t *testing.T) {
 		fmt.Fprint(w, `{}`)
 	})
 
-	_, err := postSvc.Unarchive(post.ID)
+	resp, err := client.Posts.Unarchive(post.ID)
 
 	if err != nil {
 		t.Errorf("Unarchive returned an error: %v", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Post Unarchive request code = %v, expected %v", resp.StatusCode, http.StatusOK)
 	}
 }

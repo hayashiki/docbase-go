@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestCommentService_Create(t *testing.T) {
@@ -20,18 +21,29 @@ func TestCommentService_Create(t *testing.T) {
 		fmt.Fprint(w, testutil.LoadFixture(t, "comment-response.json"))
 	})
 
-	commentSvc := NewCommentService(client)
+	cReq := &CommentCreateRequest{}
 
-	cReq := &CommentRequest{}
+	ti, err := time.Parse(time.RFC3339, "2020-03-27T09:25:09+09:00")
 
-	want := &CommentResponse{
+	want := &Comment{
+		ID:   1,
 		Body: "コメント",
+		CreatedAt: ti,
+		SimpleUser: SimpleUser{
+			ID: 1,
+			Name: "danny",
+			ProfileImageURL: "https://image.docbase.io/uploads/aaa.gif",
+		},
 	}
 
-	comment, _, err := commentSvc.Create(post.ID, cReq)
+	comment, resp, err := client.Comments.Create(post.ID, cReq)
 
 	if err != nil {
 		t.Errorf("Shouldn't have returned an error: %+v", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Comment Create request code = %v, expected %v", resp.StatusCode, http.StatusOK)
 	}
 
 	if !reflect.DeepEqual(want, comment) {
@@ -40,5 +52,5 @@ func TestCommentService_Create(t *testing.T) {
 }
 
 func TestCommentService_Delete(t *testing.T) {
-
+	t.Skip()
 }

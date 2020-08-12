@@ -12,8 +12,6 @@ func TestTagService_List(t *testing.T) {
 	setup()
 	defer teardown()
 
-	tagSvc := NewTagService(client)
-
 	mux.HandleFunc("/tags", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, testutil.LoadFixture(t, "tag-list-response.json"))
 	})
@@ -26,7 +24,15 @@ func TestTagService_List(t *testing.T) {
 		Name: "rails",
 	}
 
-	tags, _, _ := tagSvc.List()
+	tags, resp, err := client.Tags.List()
+
+	if err != nil {
+		t.Errorf("Shouldn't have returned an error: %+v", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Comment Create request code = %v, expected %v", resp.StatusCode, http.StatusOK)
+	}
 
 	want := &TagListResponse{tag1, tag2}
 	if !reflect.DeepEqual(tags, want) {
