@@ -85,4 +85,3 @@ func TestDo_httpError(t *testing.T) {
 		t.Errorf("Request Do %v, want %v", got, want)
 	}
 }
-

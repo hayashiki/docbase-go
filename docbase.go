@@ -16,7 +16,7 @@ import (
 const (
 	defaultBaseURL = "https://api.docbase.io/teams/%s"
 	apiVersion     = "2"
-	userAgent = "DocBase Go %s"
+	userAgent      = "DocBase Go %s"
 
 	// https://help.docbase.io/posts/45703#利用制限
 	headerRateLimit     = "X-RateLimit-Limit"
@@ -25,8 +25,8 @@ const (
 )
 
 const (
-	publicScope = "public"
-	groupScope = "group"
+	publicScope  = "public"
+	groupScope   = "group"
 	privateScope = "private"
 )
 
@@ -36,11 +36,11 @@ type Client struct {
 	Team        string
 	Client      *http.Client
 
-	Posts    *PostService
-	Users    *UserService
-	Groups   *GroupService
-	Tags     *TagService
-	Comments *CommentService
+	Posts       *PostService
+	Users       *UserService
+	Groups      *GroupCli
+	Tags        *TagService
+	Comments    *CommentService
 	Attachments *AttachmentService
 }
 
@@ -106,6 +106,7 @@ func (e *ErrorResponse) Error() string {
 	return strings.Join(e.Messages, "\n - ")
 }
 
+// NewClient returns client API
 func NewClient(httpClient *http.Client, team, token string, opts ...Option) *Client {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
@@ -149,6 +150,7 @@ func OptionDocbaseURL(url *url.URL) Option {
 	}
 }
 
+// NewRequest creates a API request with HTTP method, endpoint path and payload
 func (c *Client) NewRequest(method, path string, body interface{}) (*http.Request, error) {
 
 	u, err := url.Parse(fmt.Sprintf("%s/%s", c.BaseURL.String(), path))
@@ -187,7 +189,6 @@ func (c *Client) Do(r *http.Request, v interface{}) (*Response, error) {
 	}
 
 	defer resp.Body.Close()
-
 
 	response := newResponse(resp)
 
