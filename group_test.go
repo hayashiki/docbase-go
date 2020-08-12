@@ -89,8 +89,8 @@ func TestGroupCli_Create(t *testing.T) {
 	groupSvc := NewGroupService(client)
 
 	createReqest := &GroupCreateRequest{
-		Name: "DocBase",
-		Description:   "DocBase",
+		Name:        "DocBase",
+		Description: "DocBase",
 	}
 
 	mux.HandleFunc("/groups", func(w http.ResponseWriter, r *http.Request) {
@@ -105,58 +105,5 @@ func TestGroupCli_Create(t *testing.T) {
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("Create group response code = %v, expected %v", resp.StatusCode, http.StatusOK)
-	}
-
-}
-
-func TestGroupService_AddUser(t *testing.T) {
-	setup()
-	defer teardown()
-
-	groupSvc := NewGroupService(client)
-
-	req := &GroupAddRequest{
-		UserIDs: []int{43492},
-	}
-
-	group := &SimpleGroup{
-		ID:   1,
-		Name: "DocBase",
-	}
-
-	mux.HandleFunc(fmt.Sprintf("/groups/%d/users", group.ID), func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, `{}`)
-	})
-
-	_, err := groupSvc.AddUser(group.ID, req)
-
-	if err != nil {
-		t.Errorf("Fail to request err: %v", err)
-	}
-}
-
-func TestGroupService_RemoveUser(t *testing.T) {
-	setup()
-	defer teardown()
-
-	groupSvc := NewGroupService(client)
-
-	req := &GroupAddRequest{
-		UserIDs: []int{43492},
-	}
-
-	group := &SimpleGroup{
-		ID:   1,
-		Name: "DocBase",
-	}
-
-	mux.HandleFunc(fmt.Sprintf("/groups/%d/users", group.ID), func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, `{}`)
-	})
-
-	_, err := groupSvc.RemoveUser(group.ID, req)
-
-	if err != nil {
-		t.Errorf("Fail to request err: %v", err)
 	}
 }
