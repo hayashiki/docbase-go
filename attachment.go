@@ -9,6 +9,30 @@ import (
 	"time"
 )
 
+// AttachmentService implements interface with API /groups endpoint.
+// https://help.docbase.io/posts/45703#%E6%B7%BB%E4%BB%98%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB
+type AttachmentService interface {
+	Download(attachmentID string) (*FileContent, *Response, error)
+	Upload(filesPath []string) (*AttachmentResponse, *Response, error)
+}
+
+// AttachmentCli handles communication with API
+type AttachmentCli struct {
+	client *Client
+}
+
+// Attachment represents a docbase Attachment
+type Attachment struct {
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	Size      int       `json:"size"`
+	URL       string    `json:"url"`
+	Markdown  string    `json:"markdown"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type AttachmentResponse []Attachment
+
 type File struct {
 	Name    string `json:"name"`
 	Content string `json:"content"`
@@ -37,28 +61,9 @@ func (f *File) Encode(filePath string) error {
 	return nil
 }
 
-type AttachmentService struct {
-	client *Client
-}
-
-type Attachment struct {
-	ID        string    `json:"id"`
-	Name      string    `json:"name"`
-	Size      int       `json:"size"`
-	URL       string    `json:"url"`
-	Markdown  string    `json:"markdown"`
-	CreatedAt time.Time `json:"created_at"`
-}
-
-type AttachmentResponse []Attachment
-
 type FileContent []byte
 
-type Request struct {
-	ID string
-}
-
-func (s *AttachmentService) Download(attachmentID string) (*FileContent, *Response, error) {
+func (s *AttachmentCli) Download(attachmentID string) (*FileContent, *Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/attachments/%s", attachmentID))
 
 	if err != nil {
@@ -80,7 +85,7 @@ func (s *AttachmentService) Download(attachmentID string) (*FileContent, *Respon
 	return &fileResp, resp, nil
 }
 
-func (s *AttachmentService) Upload(filesPath []string) (*AttachmentResponse, *Response, error) {
+func (s *AttachmentCli) Upload(filesPath []string) (*AttachmentResponse, *Response, error) {
 
 	var files []File
 
@@ -117,6 +122,6 @@ func (s *AttachmentService) Upload(filesPath []string) (*AttachmentResponse, *Re
 	return atRes, resp, nil
 }
 
-func NewAttachmentService(client *Client) *AttachmentService {
-	return &AttachmentService{client: client}
+func NewAttachmentService(client *Client) *AttachmentCli {
+	return &AttachmentCli{client: client}
 }

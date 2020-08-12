@@ -21,13 +21,13 @@ type GroupCli struct {
 	client *Client
 }
 
-// Group represents a minimum group Object
+// Group represents a docbase minimum Group
 type SimpleGroup struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
 }
 
-// Group represents a group Object
+// Group represents a docbase Group
 type Group struct {
 	ID             int          `json:"id"`
 	Name           string       `json:"name"`

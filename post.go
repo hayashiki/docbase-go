@@ -8,7 +8,20 @@ import (
 	"time"
 )
 
-type PostService struct {
+// PostService implements interface with API /posts endpoint.
+// See https://help.docbase.io/posts/45703#%E3%82%BF%E3%82%B0
+type PostService interface {
+	List(opts *PostListOptions) (*PostListResponse, *Response, error)
+	Get(postID int) (*Post, *Response, error)
+	Create(postRequest *PostRequest) (*Post, *Response, error)
+	Delete(postID string) (*Response, error)
+	Update(postID int, postRequest *PostRequest) (*Post, *Response, error)
+	Archive(postID int) (*Response, error)
+	Unarchive(postID int) (*Response, error)
+}
+
+// PostCli handles communication with API
+type PostCli struct {
 	client *Client
 }
 
@@ -31,6 +44,7 @@ type PostListResponse struct {
 	} `json:"meta"`
 }
 
+// Post represents a docbase Post
 type Post struct {
 	ID            int              `json:"id"`
 	Title         string           `json:"title"`
@@ -72,7 +86,7 @@ type PostAttachment struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-func (s *PostService) List(opts *PostListOptions) (*PostListResponse, *Response, error) {
+func (s *PostCli) List(opts *PostListOptions) (*PostListResponse, *Response, error) {
 
 	u, err := url.Parse("/posts")
 
@@ -101,7 +115,31 @@ func (s *PostService) List(opts *PostListOptions) (*PostListResponse, *Response,
 	return mResp, resp, err
 }
 
-func (s *PostService) Create(memoReq *PostRequest) (*Post, *Response, error) {
+func (s *PostCli) Get(postID int) (*Post, *Response, error) {
+
+	u, err := url.Parse(fmt.Sprintf("/posts/%d", postID))
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	req, err := s.client.NewRequest("GET", u.String(), nil)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	mResp := &Post{}
+	resp, err := s.client.Do(req, mResp)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return mResp, resp, err
+}
+
+func (s *PostCli) Create(memoReq *PostRequest) (*Post, *Response, error) {
 	u, err := url.Parse("/posts")
 
 	if err != nil {
@@ -124,31 +162,7 @@ func (s *PostService) Create(memoReq *PostRequest) (*Post, *Response, error) {
 	return mResp, resp, err
 }
 
-func (s *PostService) Get(memoID int) (*Post, *Response, error) {
-
-	u, err := url.Parse(fmt.Sprintf("/posts/%d", memoID))
-
-	if err != nil {
-		return nil, nil, err
-	}
-
-	req, err := s.client.NewRequest("GET", u.String(), nil)
-
-	if err != nil {
-		return nil, nil, err
-	}
-
-	mResp := &Post{}
-	resp, err := s.client.Do(req, mResp)
-
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return mResp, resp, err
-}
-
-func (s *PostService) Update(memoID int, memoReq *PostRequest) (*Post, *Response, error) {
+func (s *PostCli) Update(memoID int, memoReq *PostRequest) (*Post, *Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%d", memoID))
 	if err != nil {
 		return nil, nil, err
@@ -173,7 +187,7 @@ func (s *PostService) Update(memoID int, memoReq *PostRequest) (*Post, *Response
 	return mResp, resp, err
 }
 
-func (s *PostService) Delete(memoID string) (*Response, error) {
+func (s *PostCli) Delete(memoID string) (*Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%s", memoID))
 	if err != nil {
 		return nil, err
@@ -193,7 +207,7 @@ func (s *PostService) Delete(memoID string) (*Response, error) {
 	return resp, err
 }
 
-func (s *PostService) Archive(memoID int) (*Response, error) {
+func (s *PostCli) Archive(memoID int) (*Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%d/archive", memoID))
 	if err != nil {
 		return nil, err
@@ -217,7 +231,7 @@ func (s *PostService) Archive(memoID int) (*Response, error) {
 	return resp, err
 }
 
-func (s *PostService) Unarchive(memoID int) (*Response, error) {
+func (s *PostCli) Unarchive(memoID int) (*Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%d/unarchive", memoID))
 	if err != nil {
 		return nil, err
@@ -241,6 +255,6 @@ func (s *PostService) Unarchive(memoID int) (*Response, error) {
 	return resp, err
 }
 
-func NewPostService(client *Client) *PostService {
-	return &PostService{client: client}
+func NewPostService(client *Client) *PostCli {
+	return &PostCli{client: client}
 }

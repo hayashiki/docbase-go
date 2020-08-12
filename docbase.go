@@ -36,13 +36,13 @@ type Client struct {
 	Team        string
 	Client      *http.Client
 
-	Posts       *PostService
-	Users       *UserService
+	Posts       PostService
+	Users       UserService
 	Groups      GroupService
 	GroupUsers  GroupUserService
-	Tags        *TagService
-	Comments    *CommentService
-	Attachments *AttachmentService
+	Tags        TagService
+	Comments    CommentService
+	Attachments AttachmentService
 }
 
 // Response is http response wrapper for Dobase
@@ -183,6 +183,7 @@ func (c *Client) NewRequest(method, path string, body interface{}) (*http.Reques
 	return req, nil
 }
 
+// Do sends request and returns API response
 func (c *Client) Do(r *http.Request, v interface{}) (*Response, error) {
 	resp, err := c.Client.Do(r)
 
@@ -231,6 +232,7 @@ func (c *Client) DoUpload(r *http.Request) (FileContent, *Response, error) {
 	return body, response, nil
 }
 
+// CheckResponse checks response for errors
 func CheckResponse(r *http.Response) error {
 	switch r.StatusCode {
 	case http.StatusOK:

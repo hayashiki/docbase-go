@@ -6,12 +6,19 @@ import (
 	"net/url"
 )
 
-type CommentService struct {
+// CommentService implements interface with API /groups endpoint.
+// https://help.docbase.io/posts/45703#%E3%82%B3%E3%83%A1%E3%83%B3%E3%83%88
+type CommentService interface {
+	Create(postID int, commentRequest *CommentRequest) (*CommentResponse, *Response, error)
+	Delete(commentID int) (*Response, error)
+}
+
+type CommentCli struct {
 	client *Client
 }
 
-func NewCommentService(client *Client) *CommentService {
-	return &CommentService{
+func NewCommentService(client *Client) *CommentCli {
+	return &CommentCli{
 		client: client,
 	}
 }
@@ -32,7 +39,7 @@ type CommentResponse struct {
 	Body string `json:"body"`
 }
 
-func (s *CommentService) Create(postID int, cReq *CommentRequest) (*CommentResponse, *Response, error) {
+func (s *CommentCli) Create(postID int, cReq *CommentRequest) (*CommentResponse, *Response, error) {
 
 	u, err := url.Parse(fmt.Sprintf("/posts/%d/comments", postID))
 
@@ -55,7 +62,7 @@ func (s *CommentService) Create(postID int, cReq *CommentRequest) (*CommentRespo
 	return cResp, resp, err
 }
 
-func (s *CommentService) Delete(commentID int) (*Response, error) {
+func (s *CommentCli) Delete(commentID int) (*Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/comments/%d", commentID))
 
 	if err != nil {
