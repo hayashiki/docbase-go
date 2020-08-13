@@ -16,7 +16,7 @@ import (
 const (
 	defaultBaseURL = "https://api.docbase.io/teams/%s"
 	apiVersion     = "2"
-	userAgent      = "DocBase Go %s"
+	userAgent      = "DocBase Go" + version
 
 	// https://help.docbase.io/posts/45703#利用制限
 	headerRateLimit     = "X-RateLimit-Limit"
@@ -155,7 +155,7 @@ func OptionDocbaseURL(url *url.URL) Option {
 // NewRequest creates a API request with HTTP method, endpoint path and payload
 func (c *Client) NewRequest(method, path string, body interface{}) (*http.Request, error) {
 
-	u, err := url.Parse(fmt.Sprintf("%s/%s", c.BaseURL.String(), path))
+	u, err := url.Parse(fmt.Sprintf("%s%s", c.BaseURL.String(), path))
 
 	if err != nil {
 		return nil, err
@@ -167,7 +167,6 @@ func (c *Client) NewRequest(method, path string, body interface{}) (*http.Reques
 		return nil, err
 	}
 
-	//hoge := strings.NewReader(buf)
 	req, err := http.NewRequest(method, u.String(), bytes.NewBuffer(buf))
 
 	if err != nil {
