@@ -108,7 +108,7 @@ func TestCommentService_Delete(t *testing.T) {
 	resp, err := client.Comments.Delete(comment.ID)
 
 	if err != nil {
-		//t.Errorf("Shouldn't have returned an error: %+v", err)
+		t.Errorf("Shouldn't have returned an error: %+v", err)
 	}
 
 	if resp.StatusCode != http.StatusNoContent {

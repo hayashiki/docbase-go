@@ -44,7 +44,7 @@ func (s *CommentCli) Create(postID int, commentRequest *CommentCreateRequest) (*
 		return nil, nil, err
 	}
 
-	req, err := s.client.NewRequest("POST", u.String(), commentRequest)
+	req, err := s.client.NewRequest(http.MethodPost, u.String(), commentRequest)
 
 	if err != nil {
 		return nil, nil, err
