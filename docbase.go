@@ -199,6 +199,10 @@ func (c *Client) Do(r *http.Request, v interface{}) (*Response, error) {
 		return response, err
 	}
 
+	if v == nil {
+		return response, nil
+	}
+
 	err = json.NewDecoder(resp.Body).Decode(&v)
 
 	if err != nil {
@@ -237,6 +241,8 @@ func CheckResponse(r *http.Response) error {
 	case http.StatusOK:
 		return nil
 	case http.StatusCreated:
+		return nil
+	case http.StatusNoContent:
 		return nil
 	case http.StatusInternalServerError:
 		return &ErrorResponse{
