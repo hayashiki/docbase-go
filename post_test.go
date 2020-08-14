@@ -15,12 +15,15 @@ func TestPostService_Create(t *testing.T) {
 	defer teardown()
 
 	mux.HandleFunc("/posts", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusCreated)
+		testMethod(t, r, "POST")
+
 		fmt.Fprint(w, testutil.LoadFixture(t, "post-detail-response.json"))
 	})
 
 	mReq := &PostCreateRequest{}
 
-	actual, _, err := client.Posts.Create(mReq)
+	post, resp, err := client.Posts.Create(mReq)
 
 	if err != nil {
 		t.Errorf("Shouldn't have returned an error: %+v", err)
@@ -71,13 +74,16 @@ func TestPostService_Create(t *testing.T) {
 		},
 	}
 
-	if !reflect.DeepEqual(actual, want) {
-		t.Errorf("Get return %+v, want %+v", actual, want)
+	if resp.StatusCode != http.StatusCreated {
+		t.Errorf("Post Create request code = %v, expected %v", resp.StatusCode, http.StatusOK)
+	}
+
+	if !reflect.DeepEqual(post, want) {
+		t.Errorf("Get return %+v, want %+v", post, want)
 	}
 }
 
 func TestPostService_Get(t *testing.T) {
-
 	setup()
 	defer teardown()
 
@@ -127,14 +133,13 @@ func TestPostService_Get(t *testing.T) {
 	}
 
 	mux.HandleFunc(fmt.Sprintf("/posts/%d", post.ID), func(w http.ResponseWriter, r *http.Request) {
-		//requestSent = true
-
 		u, _ := url.Parse(fmt.Sprintf("/posts/%d", post.ID))
-
 		want := u.String()
+		// TODO impl test function
 		if got := r.URL.String(); got != want {
 			t.Errorf("URL: got %v, want %v", got, want)
 		}
+		testMethod(t, r, "GET")
 
 		fmt.Fprint(w, testutil.LoadFixture(t, "post-detail-response.json"))
 	})
@@ -207,6 +212,7 @@ func TestPostService_Update(t *testing.T) {
 			t.Errorf("URL: got %v, want %v", got, want)
 		}
 
+		testMethod(t, r, "PATCH")
 		fmt.Fprint(w, testutil.LoadFixture(t, "post-detail-response.json"))
 	})
 
@@ -239,6 +245,7 @@ func TestPostService_Archive(t *testing.T) {
 		if got := r.URL.String(); got != want {
 			t.Errorf("URL: got %v, want %v", got, want)
 		}
+		testMethod(t, r, "PUT")
 
 		fmt.Fprint(w, `{}`)
 	})
@@ -270,6 +277,7 @@ func TestPostService_Unarchive(t *testing.T) {
 			t.Errorf("URL: got %v, want %v", got, want)
 		}
 
+		testMethod(t, r, "PUT")
 		fmt.Fprint(w, `{}`)
 	})
 

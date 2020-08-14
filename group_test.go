@@ -97,6 +97,8 @@ func TestGroupCli_Create(t *testing.T) {
 	}
 
 	mux.HandleFunc("/groups", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "POST")
+
 		fmt.Fprint(w, testutil.LoadFixture(t, "group-response.json"))
 	})
 

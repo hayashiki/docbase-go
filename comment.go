@@ -19,7 +19,7 @@ type CommentCli struct {
 	client *Client
 }
 
-// Post represents a docbase Comment
+// Comment represents a docbase Comment
 type Comment struct {
 	ID         int       `json:"id"`
 	Body       string    `json:"body"`
@@ -73,8 +73,7 @@ func (s *CommentCli) Delete(commentID int) (*Response, error) {
 		return nil, err
 	}
 
-	cResp := &Comment{}
-	resp, err := s.client.Do(req, cResp)
+	resp, err := s.client.Do(req, nil)
 	if err != nil {
 		return resp, err
 	}
