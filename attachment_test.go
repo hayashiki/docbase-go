@@ -25,16 +25,26 @@ func TestAttachmentService_Download(t *testing.T) {
 	}
 
 	mux.HandleFunc(fmt.Sprintf("/attachments/%s", att1.ID), func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
 		fmt.Fprint(w, `{}`)
 	})
 
 	attSvc := AttachmentCli{client}
 
-	_, _, err = attSvc.Download("fd26b8c9-0c55-48e7-a943-87292acd5682.png")
+	_, resp, err := attSvc.Download("fd26b8c9-0c55-48e7-a943-87292acd5682.png")
 
 	if err != nil {
 		t.Errorf("Shouldn't have returned an error: %+v", err)
 	}
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Download attachment response code = %v, expected %v", resp.StatusCode, http.StatusOK)
+	}
+
+	//TODO
+	//if !reflect.DeepEqual(attachment, att1) {
+	//	t.Errorf("Group returned %+v, want %+v", attachment, att1)
+	//}
 }
 
 func TestAttachmentService_Upload(t *testing.T) {
@@ -42,12 +52,15 @@ func TestAttachmentService_Upload(t *testing.T) {
 	defer teardown()
 
 	mux.HandleFunc("/attachments", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusCreated)
+		testMethod(t, r, "POST")
+
 		fmt.Fprint(w, testutil.LoadFixture(t, "attachment-list-response.json"))
 	})
 
 	attSvc := AttachmentCli{client}
 
-	atts, _, err := attSvc.Upload([]string{"./testdata/image1.jpg", "./testdata/image2.jpg"})
+	atts, resp, err := attSvc.Upload([]string{"./testdata/image1.jpg", "./testdata/image2.jpg"})
 
 	if err != nil {
 		t.Errorf("Shouldn't have returned an error: %+v", err)
@@ -74,6 +87,14 @@ func TestAttachmentService_Upload(t *testing.T) {
 	}
 
 	want := &AttachmentResponse{att1, att2}
+
+	if err != nil {
+		t.Errorf("Fail to get group request err: %v", err)
+	}
+
+	if resp.StatusCode != http.StatusCreated {
+		t.Errorf("Upload attachment response code = %v, expected %v", resp.StatusCode, http.StatusCreated)
+	}
 
 	if !reflect.DeepEqual(atts, want) {
 		t.Errorf("Attachment returned %+v, want %+v", atts, want)

@@ -14,6 +14,7 @@ func TestGroupService_List(t *testing.T) {
 	defer teardown()
 
 	mux.HandleFunc("/groups", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
 		fmt.Fprint(w, testutil.LoadFixture(t, "group-list-response.json"))
 	})
 
@@ -60,7 +61,7 @@ func TestGroupService_Get(t *testing.T) {
 		t.Errorf("Fail to parse err: %v", err)
 	}
 
-	group := &Group{
+	expect := &Group{
 		ID:             1,
 		Name:           "グループ1",
 		Description:    "APIで作ったグループ",
@@ -76,14 +77,22 @@ func TestGroupService_Get(t *testing.T) {
 		},
 	}
 
-	mux.HandleFunc(fmt.Sprintf("/groups/%d", group.ID), func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(fmt.Sprintf("/groups/%d", expect.ID), func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, testutil.LoadFixture(t, "group-response.json"))
 	})
 
-	actual, _, _ := client.Groups.Get(group.ID)
+	group, resp, err := client.Groups.Get(expect.ID)
 
-	if !reflect.DeepEqual(actual, group) {
-		t.Errorf("Group returned %+v, want %+v", actual, group)
+	if err != nil {
+		t.Errorf("Fail to get group request err: %v", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Upload attachment response code = %v, expected %v", resp.StatusCode, http.StatusOK)
+	}
+
+	if !reflect.DeepEqual(group, expect) {
+		t.Errorf("Group returned %+v, want %+v", group, expect)
 	}
 }
 
@@ -97,6 +106,7 @@ func TestGroupCli_Create(t *testing.T) {
 	}
 
 	mux.HandleFunc("/groups", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusCreated)
 		testMethod(t, r, "POST")
 
 		fmt.Fprint(w, testutil.LoadFixture(t, "group-response.json"))
@@ -108,8 +118,8 @@ func TestGroupCli_Create(t *testing.T) {
 		t.Errorf("Fail to create group request err: %v", err)
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		t.Errorf("Create group response code = %v, expected %v", resp.StatusCode, http.StatusOK)
+	if resp.StatusCode != http.StatusCreated {
+		t.Errorf("Create group response code = %v, expected %v", resp.StatusCode, http.StatusCreated)
 	}
 
 	ti, err := time.Parse(time.RFC3339, "2020-03-27T09:25:09+09:00")

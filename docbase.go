@@ -3,6 +3,7 @@ package docbase
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -10,6 +11,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -36,6 +38,9 @@ type Client struct {
 	Team        string
 	Client      *http.Client
 
+	rateMu    sync.Mutex
+	rateLimit   Rate
+
 	Posts       PostService
 	Users       UserService
 	Groups      GroupService
@@ -55,56 +60,6 @@ func newResponse(r *http.Response) *Response {
 	res := &Response{Response: r}
 	res.Rate = parseRate(r)
 	return res
-}
-
-func parseRate(r *http.Response) Rate {
-	var (
-		rate Rate
-		err  error
-	)
-
-	if limit := r.Header.Get(headerRateLimit); limit != "" {
-		rate.Limit, err = strconv.Atoi(limit)
-		if err != nil {
-			rate.err = err
-		}
-	}
-	if remaining := r.Header.Get(headerRateRemaining); remaining != "" {
-		rate.Remaining, err = strconv.Atoi(remaining)
-		if err != nil {
-			rate.err = err
-		}
-	}
-	if reset := r.Header.Get(headerRateReset); reset != "" {
-		v, e := strconv.ParseInt(reset, 10, 64)
-		if e != nil {
-			rate.err = e
-		} else if v != 0 {
-			//rate.Reset = Timestamp{time.Unix(v, 0)}
-		}
-	}
-	return rate
-}
-
-type Rate struct {
-	// The number of requests per hour the client is currently limited to.
-	Limit int `json:"limit"`
-
-	// The number of remaining requests the client can make this hour.
-	Remaining int `json:"remaining"`
-
-	// The time at which the current rate limit will reset.
-	Reset time.Time `json:"reset"`
-
-	err error
-}
-
-type ErrorResponse struct {
-	Messages []string `json:"messages"`
-}
-
-func (e *ErrorResponse) Error() string {
-	return strings.Join(e.Messages, "\n - ")
 }
 
 // NewClient returns client API
@@ -184,6 +139,14 @@ func (c *Client) NewRequest(method, path string, body interface{}) (*http.Reques
 
 // Do sends request and returns API response
 func (c *Client) Do(r *http.Request, v interface{}) (*Response, error) {
+
+	if err := c.checkRateLimitBeforeDo(r); err != nil {
+		return &Response{
+			Response: err.Response,
+			Rate:     err.Rate,
+		}, err
+	}
+
 	resp, err := c.Client.Do(r)
 
 	if err != nil {
@@ -213,22 +176,16 @@ func (c *Client) Do(r *http.Request, v interface{}) (*Response, error) {
 
 func (c *Client) DoUpload(r *http.Request) (FileContent, *Response, error) {
 	resp, err := c.Client.Do(r)
-
 	if err != nil {
 		return nil, nil, err
 	}
-
 	defer resp.Body.Close()
-
 	response := newResponse(resp)
-
 	err = CheckResponse(resp)
 	if err != nil {
 		return nil, response, err
 	}
-
 	body, err := ioutil.ReadAll(resp.Body)
-
 	if err != nil {
 		return nil, response, err
 	}
@@ -237,32 +194,130 @@ func (c *Client) DoUpload(r *http.Request) (FileContent, *Response, error) {
 
 // CheckResponse checks response for errors
 func CheckResponse(r *http.Response) error {
+	if c := r.StatusCode; c == http.StatusOK || c == http.StatusCreated || c == http.StatusNoContent {
+		return nil
+	}
+	errorResponse := &ErrorResponse{Response: r}
+	data, err := ioutil.ReadAll(r.Body)
+	if err == nil && data != nil {
+		err = json.Unmarshal(data, errorResponse)
+		if err != nil {
+			errorResponse.err = errors.New("Not JSON")
+		}
+	}
 	switch r.StatusCode {
-	case http.StatusOK:
-		return nil
-	case http.StatusCreated:
-		return nil
-	case http.StatusNoContent:
-		return nil
-	case http.StatusInternalServerError:
-		return &ErrorResponse{
-			Messages: []string{"Internal Server Error"},
-		}
-	case http.StatusBadRequest:
-		return &ErrorResponse{
-			Messages: []string{"Bad Request"},
-		}
-	case http.StatusForbidden:
-		return &ErrorResponse{
-			Messages: []string{"Forbidden"},
+	case http.StatusTooManyRequests:
+		return &RateLimitError{
+			Rate:     parseRate(r),
+			Response: errorResponse.Response,
+			Messages:  errorResponse.Messages,
 		}
 	default:
-		var errResp ErrorResponse
-		dec := json.NewDecoder(r.Body)
-		err := dec.Decode(&errResp)
-		if err != nil {
-			errResp.Messages = []string{"Couldn't decode response body JSON"}
-		}
-		return &errResp
+		return errorResponse
 	}
+}
+
+// parseRate referenced from https://github.com/google/go-github/blob/master/github/github.go#L495
+func parseRate(r *http.Response) Rate {
+	var (
+		rate Rate
+		err  error
+	)
+
+	if limit := r.Header.Get(headerRateLimit); limit != "" {
+		rate.Limit, err = strconv.Atoi(limit)
+		if err != nil {
+			rate.err = err
+		}
+	}
+	if remaining := r.Header.Get(headerRateRemaining); remaining != "" {
+		rate.Remaining, err = strconv.Atoi(remaining)
+		if err != nil {
+			rate.err = err
+		}
+	}
+	if reset := r.Header.Get(headerRateReset); reset != "" {
+		v, e := strconv.ParseInt(reset, 10, 64)
+		if e != nil {
+			rate.err = e
+		} else if v != 0 {
+			rate.Reset = Timestamp{time.Unix(v, 0)}
+		}
+	}
+	return rate
+}
+
+
+// checkRateLimitBeforeDo referenced from https://github.com/google/go-github/blob/master/github/github.go#L627
+func (c *Client) checkRateLimitBeforeDo(req *http.Request) *RateLimitError {
+	c.rateMu.Lock()
+	rate := c.rateLimit
+	c.rateMu.Unlock()
+	if !rate.Reset.Time.IsZero() && rate.Remaining == 0 && time.Now().Before(rate.Reset.Time) {
+		// Create a fake response.
+		resp := &http.Response{
+			Status:     http.StatusText(http.StatusForbidden),
+			StatusCode: http.StatusForbidden,
+			Request:    req,
+			Header:     make(http.Header),
+			Body:       ioutil.NopCloser(strings.NewReader("")),
+		}
+		return &RateLimitError{
+			Rate:     rate,
+			Response: resp,
+			Messages:  []string{fmt.Sprintf("API rate limit of %v still exceeded until %v, not making remote request.", rate.Limit, rate.Reset.Time)},
+		}
+	}
+
+	return nil
+}
+
+// Rate referenced from https://github.com/google/go-github/blob/master/github/github.go#L861
+type Rate struct {
+	Limit int `json:"limit"`
+	Remaining int `json:"remaining"`
+	Reset Timestamp `json:"reset"`
+	err error
+}
+
+// RateLimitError referenced from https://github.com/google/go-github/blob/master/github/github.go#L687
+type RateLimitError struct {
+	Rate     Rate           // Rate specifies last known rate limit for the client
+	Response *http.Response // HTTP response that caused this error
+	Messages  []string         `json:"message"` // error message
+}
+
+// Error referenced from https://github.com/google/go-github/blob/master/github/github.go#L693
+func (r *RateLimitError) Error() string {
+	return fmt.Sprintf("%v %v: %d %v %v",
+		r.Response.Request.Method, sanitizeURL(r.Response.Request.URL),
+		r.Response.StatusCode, r.Messages, r.Rate.Reset.Time.Sub(time.Now()))
+}
+
+// sanitizeURL referenced from https://github.com/google/go-github/blob/master/github/github.go#L734
+func sanitizeURL(uri *url.URL) *url.URL {
+	if uri == nil {
+		return nil
+	}
+	params := uri.Query()
+	if len(params.Get("client_secret")) > 0 {
+		params.Set("client_secret", "REDACTED")
+		uri.RawQuery = params.Encode()
+	}
+	return uri
+}
+
+// ErrorResponse referenced from https://github.com/google/go-github/blob/master/github/github.go#L655
+type ErrorResponse struct {
+	Response *http.Response // HTTP response that caused this error
+	Messages  []string         `json:"messages"` // error message
+	ErrorStr string         `json:"error"`   // more detail about an error
+	err      error          // CheckResponse error
+}
+
+// ErrorResponse referenced from https://github.com/google/go-github/blob/master/github/github.go#L655
+func (r *ErrorResponse) Error() string {
+	return fmt.Sprintf("%v %v: %d %v %+v",
+		r.Response.Request.Method, sanitizeURL(r.Response.Request.URL),
+		r.Response.StatusCode, r.Messages, r.ErrorStr)
 }

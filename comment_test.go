@@ -64,11 +64,11 @@ func TestCommentCli_Create_Error(t *testing.T) {
 	mux.HandleFunc(fmt.Sprintf("/posts/%d/comments", post.ID), func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, `{
-		  "errors":
-		  [
-				"Bad request"
-		  ]
-		}`)
+    "error": "bad_request",
+    "messages": [
+        "Nameを入力してください"
+    ]
+}`)
 	})
 
 	cReq := &CommentCreateRequest{}
@@ -80,8 +80,8 @@ func TestCommentCli_Create_Error(t *testing.T) {
 		t.Errorf("Error should be of type ErrorResponse but is %v: %+v", reflect.TypeOf(err), err)
 	}
 
-	want := "Bad Request"
-	if got := errResp.Messages[0]; want != got {
+	want := "bad_request"
+	if got := errResp.ErrorStr; want != got {
 		t.Errorf("Error message: %v, want %v", got, want)
 	}
 
