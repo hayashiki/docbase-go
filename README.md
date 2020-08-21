@@ -37,7 +37,10 @@ func main() {
   }
   
   posts, resp, err := client.Posts.List(opts)
-  fmt.Printf("%+v", posts)
+  if err != nil {
+    return
+  }
+  fmt.Printf("resp: %+v, posts: %+v", posts)
 }
 
 ```
@@ -59,10 +62,10 @@ post, resp, err := client.Posts.Create(&docbase.PostRequest{})
 // Update the information about the post
 post, resp, err := client.Posts.Update(1234567, &docbase.PostRequest{})
 
-// Archive the post list
+// Archive the post
 resp, err := client.Posts.Archive(1234567)
 
-// Unarchive the post list
+// Unarchive the post
 resp, err := client.Posts.Unarchive(1234567)
 
 
@@ -76,17 +79,17 @@ resp, err := client.Posts.Unarchive(1234567)
 groups, resp, err := client.Groups.List(&docbase.GroupListOptions{})
 
 // Get the information about the group detail
-group, _, _ := client.Groups.Get(12345)
+group, resp, err := client.Groups.Get(12345)
 
 // Add the user to the group
-resp, err := client.Groups.AddUser(12345, &docbase.GroupAddRequest{})
+resp, err := client.GroupUsers.Create(12345, &docbase.GroupUserCreateRequest{})
 
 // Remove the user to the group
-resp, err := client.Groups.RemoveUser(17769, req)
+resp, err := client.GroupUsers.Delete(12345, &docbase.GroupUserCreateRequest{})
 
 ```
 
-# Tags
+## Tags
 
 ``` go
 // Get the information about the tag list
@@ -94,12 +97,22 @@ tags, resp, err := client.Tags.List()
 
 ```
 
-# Users
+## Users
 
 ``` go
 // Get the information about the tag list
 users, resp, err := client.Users.List(&docbase.UserListOptions{})
 
+```
+
+## Attachments
+
+``` go
+// Download an attachment
+file, resp, err := client.Attachments.Download("8babf378-1234-5678-b62b-5a2a6c536b2b.png")
+
+// Upload an attachment, select multiple files path
+files, resp, err := client.Attachments.Upload([]string{"./testdata/test-image.jpg"})
 ```
 
 # Note
