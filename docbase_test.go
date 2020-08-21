@@ -1,6 +1,7 @@
 package docbase
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -113,18 +114,24 @@ func TestDo_httpError(t *testing.T) {
 	defer teardown()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, `{
+    "error": "bad_request",
+    "messages": [
+        "Nameを入力してください"
+    ]
+}`)
 	})
 
 	req, _ := client.NewRequest("GET", "/", nil)
 	_, err := client.Do(req, nil)
 
-	_, ok := err.(*ErrorResponse)
+	errResp, ok := err.(*ErrorResponse)
 	if !ok {
 		t.Errorf("Error should be of type ErrorResponse but is %v: %+v", reflect.TypeOf(err), err)
 	}
 
-	if got, want := err.Error(), "Bad Request"; got != want {
+	if got, want := errResp.ErrorStr, "bad_request"; got != want {
 		t.Errorf("Request Do %v, want %v", got, want)
 	}
 }
