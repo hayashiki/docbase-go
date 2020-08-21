@@ -2,6 +2,7 @@
 //
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+// copied from https://github.com/google/go-github/blob/master/github/timestamp.go
 
 package docbase
 
