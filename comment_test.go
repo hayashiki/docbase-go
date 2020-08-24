@@ -28,12 +28,12 @@ func TestCommentService_Create(t *testing.T) {
 	ti, err := time.Parse(time.RFC3339, "2020-03-27T09:25:09+09:00")
 
 	want := &Comment{
-		ID:   1,
-		Body: "コメント",
+		ID:        1,
+		Body:      "コメント",
 		CreatedAt: ti,
 		SimpleUser: SimpleUser{
-			ID: 1,
-			Name: "danny",
+			ID:              1,
+			Name:            "danny",
 			ProfileImageURL: "https://image.docbase.io/uploads/aaa.gif",
 		},
 	}
@@ -95,7 +95,7 @@ func TestCommentService_Delete(t *testing.T) {
 	defer teardown()
 
 	comment := &Comment{
-		ID:   1,
+		ID: 1,
 	}
 
 	mux.HandleFunc(fmt.Sprintf("/comments/%d", comment.ID), func(w http.ResponseWriter, r *http.Request) {

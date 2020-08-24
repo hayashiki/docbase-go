@@ -39,7 +39,7 @@ type Client struct {
 	Client      *http.Client
 
 	rateMu    sync.Mutex
-	rateLimit   Rate
+	rateLimit Rate
 
 	Posts       PostService
 	Users       UserService
@@ -210,7 +210,7 @@ func CheckResponse(r *http.Response) error {
 		return &RateLimitError{
 			Rate:     parseRate(r),
 			Response: errorResponse.Response,
-			Messages:  errorResponse.Messages,
+			Messages: errorResponse.Messages,
 		}
 	default:
 		return errorResponse
@@ -247,7 +247,6 @@ func parseRate(r *http.Response) Rate {
 	return rate
 }
 
-
 // checkRateLimitBeforeDo referenced from https://github.com/google/go-github/blob/master/github/github.go#L627
 func (c *Client) checkRateLimitBeforeDo(req *http.Request) *RateLimitError {
 	c.rateMu.Lock()
@@ -265,7 +264,7 @@ func (c *Client) checkRateLimitBeforeDo(req *http.Request) *RateLimitError {
 		return &RateLimitError{
 			Rate:     rate,
 			Response: resp,
-			Messages:  []string{fmt.Sprintf("API rate limit of %v still exceeded until %v, not making remote request.", rate.Limit, rate.Reset.Time)},
+			Messages: []string{fmt.Sprintf("API rate limit of %v still exceeded until %v, not making remote request.", rate.Limit, rate.Reset.Time)},
 		}
 	}
 
@@ -274,17 +273,17 @@ func (c *Client) checkRateLimitBeforeDo(req *http.Request) *RateLimitError {
 
 // Rate referenced from https://github.com/google/go-github/blob/master/github/github.go#L861
 type Rate struct {
-	Limit int `json:"limit"`
-	Remaining int `json:"remaining"`
-	Reset Timestamp `json:"reset"`
-	err error
+	Limit     int       `json:"limit"`
+	Remaining int       `json:"remaining"`
+	Reset     Timestamp `json:"reset"`
+	err       error
 }
 
 // RateLimitError referenced from https://github.com/google/go-github/blob/master/github/github.go#L687
 type RateLimitError struct {
 	Rate     Rate           // Rate specifies last known rate limit for the client
 	Response *http.Response // HTTP response that caused this error
-	Messages  []string         `json:"message"` // error message
+	Messages []string       `json:"message"` // error message
 }
 
 // Error referenced from https://github.com/google/go-github/blob/master/github/github.go#L693
@@ -310,8 +309,8 @@ func sanitizeURL(uri *url.URL) *url.URL {
 // ErrorResponse referenced from https://github.com/google/go-github/blob/master/github/github.go#L655
 type ErrorResponse struct {
 	Response *http.Response // HTTP response that caused this error
-	Messages  []string         `json:"messages"` // error message
-	ErrorStr string         `json:"error"`   // more detail about an error
+	Messages []string       `json:"messages"` // error message
+	ErrorStr string         `json:"error"`    // more detail about an error
 	err      error          // CheckResponse error
 }
 

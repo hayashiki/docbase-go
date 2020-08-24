@@ -65,6 +65,7 @@ func (s *GroupCli) List(opts *GroupListOptions) (*GroupListResponse, *Response, 
 	q.Set("per_page", strconv.Itoa(opts.PerPage))
 	q.Set("page", strconv.Itoa(opts.Page))
 	q.Set("q", opts.Name)
+	u.RawQuery = q.Encode()
 
 	req, err := s.client.NewRequest(http.MethodGet, u.String(), nil)
 

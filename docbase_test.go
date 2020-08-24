@@ -83,7 +83,7 @@ func TestClient_NewRequest(t *testing.T) {
 	outBody := `{"Foo":"Bar"}`
 
 	req, err := cli.NewRequest(method, inURL, inBody)
-	
+
 	if err != nil {
 		t.Errorf("err")
 	}

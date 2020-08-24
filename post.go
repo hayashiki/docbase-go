@@ -99,6 +99,7 @@ func (s *PostCli) List(opts *PostListOptions) (*PostListResponse, *Response, err
 	q.Set("per_page", strconv.Itoa(opts.PerPage))
 	q.Set("page", strconv.Itoa(opts.Page))
 	q.Set("q", opts.Q)
+	u.RawQuery = q.Encode()
 
 	req, err := s.client.NewRequest(http.MethodGet, u.String(), nil)
 

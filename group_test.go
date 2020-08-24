@@ -131,7 +131,7 @@ func TestGroupCli_Create(t *testing.T) {
 		PostsCount:     0,
 		LastActivityAt: ti,
 		CreatedAt:      ti,
-		Users:          []SimpleUser{
+		Users: []SimpleUser{
 			SimpleUser{
 				ID:              1,
 				Name:            "docbaseman",
