@@ -60,6 +60,7 @@ func (s *UserCli) List(opts *UserListOptions) (*UserListResponse, *Response, err
 	q.Set("page", strconv.Itoa(opts.Page))
 	q.Set("q", opts.Q)
 	q.Set("include_user_groups", opts.Q)
+	u.RawQuery = q.Encode()
 
 	req, err := s.client.NewRequest(http.MethodGet, u.String(), nil)
 

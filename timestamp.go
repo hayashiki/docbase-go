@@ -7,8 +7,8 @@
 package docbase
 
 import (
-"strconv"
-"time"
+	"strconv"
+	"time"
 )
 
 // Timestamp represents a time that can be unmarshalled from a JSON string
