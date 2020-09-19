@@ -13,8 +13,8 @@ type UserService interface {
 	List(opts *UserListOptions) (*UserListResponse, *Response, error)
 }
 
-// UserCli handles communication with API
-type UserCli struct {
+// userService handles communication with API
+type userService struct {
 	client *Client
 }
 
@@ -48,7 +48,7 @@ type UserListOptions struct {
 }
 
 // List User
-func (s *UserCli) List(opts *UserListOptions) (*UserListResponse, *Response, error) {
+func (s *userService) List(opts *UserListOptions) (*UserListResponse, *Response, error) {
 	u, err := url.Parse("/users")
 
 	if err != nil {

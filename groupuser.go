@@ -13,8 +13,8 @@ type GroupUserService interface {
 	Delete(id int, groupUserCreateRequest *GroupUserCreateRequest) (*Response, error)
 }
 
-// GroupUserCli handles communication with API
-type GroupUserCli struct {
+// groupUserService handles communication with API
+type groupUserService struct {
 	client *Client
 }
 
@@ -22,7 +22,7 @@ type GroupUserCreateRequest struct {
 	UserIDs []int `json:"user_ids"`
 }
 
-func (c *GroupUserCli) Create(id int, groupUserCreateRequest *GroupUserCreateRequest) (*Response, error) {
+func (c *groupUserService) Create(id int, groupUserCreateRequest *GroupUserCreateRequest) (*Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/groups/%d/users", id))
 
 	if err != nil {
@@ -44,7 +44,7 @@ func (c *GroupUserCli) Create(id int, groupUserCreateRequest *GroupUserCreateReq
 	return resp, err
 }
 
-func (c *GroupUserCli) Delete(id int, groupUserCreateRequest *GroupUserCreateRequest) (*Response, error) {
+func (c *groupUserService) Delete(id int, groupUserCreateRequest *GroupUserCreateRequest) (*Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/groups/%d/users", id))
 
 	if err != nil {

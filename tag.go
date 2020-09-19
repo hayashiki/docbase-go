@@ -11,8 +11,8 @@ type TagService interface {
 	List() (*TagListResponse, *Response, error)
 }
 
-// TagCli handles communication with API
-type TagCli struct {
+// tagService handles communication with API
+type tagService struct {
 	client *Client
 }
 
@@ -23,7 +23,7 @@ type Tag struct {
 
 type TagListResponse []Tag
 
-func (s *TagCli) List() (*TagListResponse, *Response, error) {
+func (s *tagService) List() (*TagListResponse, *Response, error) {
 	u, err := url.Parse("/tags")
 
 	if err != nil {

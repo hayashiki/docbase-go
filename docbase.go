@@ -89,20 +89,20 @@ func NewClient(httpClient *http.Client, team, token string, opts ...Option) *Cli
 		cli.BaseURL = baseURL
 	}
 
-	cli.Posts = &PostCli{cli}
-	cli.Groups = &GroupCli{cli}
-	cli.Users = &UserCli{cli}
-	cli.Comments = &CommentCli{cli}
-	cli.Tags = &TagCli{cli}
-	cli.Attachments = &AttachmentCli{cli}
-	cli.GroupUsers = &GroupUserCli{cli}
+	cli.Posts = &postService{cli}
+	cli.Groups = &groupService{cli}
+	cli.Users = &userService{cli}
+	cli.Comments = &commentService{cli}
+	cli.Tags = &tagService{cli}
+	cli.Attachments = &attachmentService{cli}
+	cli.GroupUsers = &groupUserService{cli}
 
 	return cli
 }
 
 type Option func(client *Client)
 
-func OptionDocbaseURL(url *url.URL) Option {
+func OptionDocBaseURL(url *url.URL) Option {
 	return func(client *Client) {
 		client.BaseURL = url
 	}

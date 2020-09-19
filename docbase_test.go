@@ -21,7 +21,7 @@ func setup() {
 	server = httptest.NewServer(mux)
 	url, _ := url.Parse(server.URL)
 
-	client = NewClient(nil, "dummyTeam", "dummyToken", OptionDocbaseURL(url))
+	client = NewClient(nil, "dummyTeam", "dummyToken", OptionDocBaseURL(url))
 }
 
 func teardown() {

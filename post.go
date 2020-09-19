@@ -20,8 +20,8 @@ type PostService interface {
 	Unarchive(postID int) (*Response, error)
 }
 
-// PostCli handles communication with API
-type PostCli struct {
+// postService handles communication with API
+type postService struct {
 	client *Client
 }
 
@@ -59,7 +59,7 @@ type PostListResponse struct {
 	} `json:"meta"`
 }
 
-// Post represents a docbase Post
+// Post represents a DocBase Post
 type Post struct {
 	ID            int           `json:"id"`
 	Title         string        `json:"title"`
@@ -87,7 +87,7 @@ type PostListOptions struct {
 }
 
 // List Post
-func (s *PostCli) List(opts *PostListOptions) ([]*Post, *Response, error) {
+func (s *postService) List(opts *PostListOptions) ([]*Post, *Response, error) {
 
 	u, err := url.Parse("/posts")
 
@@ -122,7 +122,7 @@ func (s *PostCli) List(opts *PostListOptions) ([]*Post, *Response, error) {
 }
 
 // Get Post
-func (s *PostCli) Get(postID int) (*Post, *Response, error) {
+func (s *postService) Get(postID int) (*Post, *Response, error) {
 
 	u, err := url.Parse(fmt.Sprintf("/posts/%d", postID))
 
@@ -147,7 +147,7 @@ func (s *PostCli) Get(postID int) (*Post, *Response, error) {
 }
 
 // Create Post
-func (s *PostCli) Create(memoReq *PostCreateRequest) (*Post, *Response, error) {
+func (s *postService) Create(memoReq *PostCreateRequest) (*Post, *Response, error) {
 	u, err := url.Parse("/posts")
 
 	if err != nil {
@@ -171,7 +171,7 @@ func (s *PostCli) Create(memoReq *PostCreateRequest) (*Post, *Response, error) {
 }
 
 // Update Post
-func (s *PostCli) Update(postID int, postUpdateRequest *PostUpdateRequest) (*Post, *Response, error) {
+func (s *postService) Update(postID int, postUpdateRequest *PostUpdateRequest) (*Post, *Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%d", postID))
 	if err != nil {
 		return nil, nil, err
@@ -197,7 +197,7 @@ func (s *PostCli) Update(postID int, postUpdateRequest *PostUpdateRequest) (*Pos
 }
 
 // Delete Post
-func (s *PostCli) Delete(postID string) (*Response, error) {
+func (s *postService) Delete(postID string) (*Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%s", postID))
 	if err != nil {
 		return nil, err
@@ -218,7 +218,7 @@ func (s *PostCli) Delete(postID string) (*Response, error) {
 }
 
 // Archive Post
-func (s *PostCli) Archive(postID int) (*Response, error) {
+func (s *postService) Archive(postID int) (*Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%d/archive", postID))
 	if err != nil {
 		return nil, err
@@ -243,7 +243,7 @@ func (s *PostCli) Archive(postID int) (*Response, error) {
 }
 
 // Unarchive Post
-func (s *PostCli) Unarchive(postID int) (*Response, error) {
+func (s *postService) Unarchive(postID int) (*Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%d/unarchive", postID))
 	if err != nil {
 		return nil, err

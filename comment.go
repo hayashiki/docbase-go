@@ -14,8 +14,8 @@ type CommentService interface {
 	Delete(commentID int) (*Response, error)
 }
 
-// CommentCli handles communication with API
-type CommentCli struct {
+// commentService handles communication with API
+type commentService struct {
 	client *Client
 }
 
@@ -36,7 +36,7 @@ type CommentCreateRequest struct {
 }
 
 // Create Comment
-func (s *CommentCli) Create(postID int, commentRequest *CommentCreateRequest) (*Comment, *Response, error) {
+func (s *commentService) Create(postID int, commentRequest *CommentCreateRequest) (*Comment, *Response, error) {
 
 	u, err := url.Parse(fmt.Sprintf("/posts/%d/comments", postID))
 
@@ -60,7 +60,7 @@ func (s *CommentCli) Create(postID int, commentRequest *CommentCreateRequest) (*
 }
 
 // Delete Comment
-func (s *CommentCli) Delete(commentID int) (*Response, error) {
+func (s *commentService) Delete(commentID int) (*Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/comments/%d", commentID))
 
 	if err != nil {
