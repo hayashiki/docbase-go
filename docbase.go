@@ -54,6 +54,7 @@ type Client struct {
 type Response struct {
 	*http.Response
 	Rate
+	Meta
 }
 
 func newResponse(r *http.Response) *Response {
@@ -284,6 +285,12 @@ type RateLimitError struct {
 	Rate     Rate           // Rate specifies last known rate limit for the client
 	Response *http.Response // HTTP response that caused this error
 	Messages []string       `json:"message"` // error message
+}
+
+type Meta struct {
+	PreviousPage string `json:"previous_page"`
+	NextPage     string `json:"next_page"`
+	Total        int    `json:"total"`
 }
 
 // Error referenced from https://github.com/google/go-github/blob/master/github/github.go#L693

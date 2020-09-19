@@ -11,7 +11,7 @@ import (
 // PostService implements interface with API /posts endpoint.
 // See https://help.docbase.io/posts/45703#%E3%82%BF%E3%82%B0
 type PostService interface {
-	List(opts *PostListOptions) (*PostListResponse, *Response, error)
+	List(opts *PostListOptions) ([]*Post, *Response, error)
 	Get(postID int) (*Post, *Response, error)
 	Create(postRequest *PostCreateRequest) (*Post, *Response, error)
 	Update(postID int, postUpdateRequest *PostUpdateRequest) (*Post, *Response, error)
@@ -46,12 +46,12 @@ type PostUpdateRequest struct {
 	Notice      bool      `json:"notice"` // optional, default: true
 	Tags        []string  `json:"tags"`
 	Scope       string    `json:"scope"` // optional, default: everyone
-	Groups      []string  `json:"scope"`
+	Groups      []string  `json:"groups"`
 	PublishedAt time.Time `json:"published_at"`
 }
 
 type PostListResponse struct {
-	Posts []Post `json:"posts"`
+	Posts []*Post `json:"posts"`
 	Meta  struct {
 		PreviousPage string `json:"previous_page"`
 		NextPage     string `json:"next_page"`
@@ -87,7 +87,7 @@ type PostListOptions struct {
 }
 
 // List Post
-func (s *PostCli) List(opts *PostListOptions) (*PostListResponse, *Response, error) {
+func (s *PostCli) List(opts *PostListOptions) ([]*Post, *Response, error) {
 
 	u, err := url.Parse("/posts")
 
@@ -114,7 +114,11 @@ func (s *PostCli) List(opts *PostListOptions) (*PostListResponse, *Response, err
 		return nil, nil, err
 	}
 
-	return mResp, resp, err
+	resp.Total = mResp.Meta.Total
+	resp.NextPage = mResp.Meta.NextPage
+	resp.PreviousPage = mResp.Meta.PreviousPage
+
+	return mResp.Posts, resp, err
 }
 
 // Get Post
