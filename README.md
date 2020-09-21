@@ -5,7 +5,7 @@
 
 # docbase-go
 
-Unofficial Docbase API client library, written in Go.
+Unofficial DocBase API client library, written in Go.
 
 
 # Installation

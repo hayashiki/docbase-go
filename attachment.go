@@ -16,8 +16,8 @@ type AttachmentService interface {
 	Upload(filesPath []string) (*AttachmentResponse, *Response, error)
 }
 
-// AttachmentCli handles communication with API
-type AttachmentCli struct {
+// attachmentService handles communication with API
+type attachmentService struct {
 	client *Client
 }
 
@@ -63,7 +63,7 @@ func (f *File) Encode(filePath string) error {
 
 type FileContent []byte
 
-func (s *AttachmentCli) Download(attachmentID string) (*FileContent, *Response, error) {
+func (s *attachmentService) Download(attachmentID string) (*FileContent, *Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/attachments/%s", attachmentID))
 
 	if err != nil {
@@ -85,7 +85,7 @@ func (s *AttachmentCli) Download(attachmentID string) (*FileContent, *Response, 
 	return &fileResp, resp, nil
 }
 
-func (s *AttachmentCli) Upload(filesPath []string) (*AttachmentResponse, *Response, error) {
+func (s *attachmentService) Upload(filesPath []string) (*AttachmentResponse, *Response, error) {
 
 	var files []File
 

@@ -5,13 +5,14 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 )
 
 // PostService implements interface with API /posts endpoint.
 // See https://help.docbase.io/posts/45703#%E3%82%BF%E3%82%B0
 type PostService interface {
-	List(opts *PostListOptions) (*PostListResponse, *Response, error)
+	List(opts *PostListOptions) ([]*Post, *Response, error)
 	Get(postID int) (*Post, *Response, error)
 	Create(postRequest *PostCreateRequest) (*Post, *Response, error)
 	Update(postID int, postUpdateRequest *PostUpdateRequest) (*Post, *Response, error)
@@ -20,8 +21,8 @@ type PostService interface {
 	Unarchive(postID int) (*Response, error)
 }
 
-// PostCli handles communication with API
-type PostCli struct {
+// postService handles communication with API
+type postService struct {
 	client *Client
 }
 
@@ -46,12 +47,12 @@ type PostUpdateRequest struct {
 	Notice      bool      `json:"notice"` // optional, default: true
 	Tags        []string  `json:"tags"`
 	Scope       string    `json:"scope"` // optional, default: everyone
-	Groups      []string  `json:"scope"`
+	Groups      []string  `json:"groups"`
 	PublishedAt time.Time `json:"published_at"`
 }
 
 type PostListResponse struct {
-	Posts []Post `json:"posts"`
+	Posts []*Post `json:"posts"`
 	Meta  struct {
 		PreviousPage string `json:"previous_page"`
 		NextPage     string `json:"next_page"`
@@ -59,7 +60,7 @@ type PostListResponse struct {
 	} `json:"meta"`
 }
 
-// Post represents a docbase Post
+// Post represents a DocBase Post
 type Post struct {
 	ID            int           `json:"id"`
 	Title         string        `json:"title"`
@@ -86,8 +87,14 @@ type PostListOptions struct {
 	PerPage int    `url:"per_page,omitempty"`
 }
 
+func (opts *PostListOptions) SetDefaultSort() {
+	if !strings.Contains(opts.Q, "desc:") {
+		opts.Q += "+desc:score"
+	}
+}
+
 // List Post
-func (s *PostCli) List(opts *PostListOptions) (*PostListResponse, *Response, error) {
+func (s *postService) List(opts *PostListOptions) ([]*Post, *Response, error) {
 
 	u, err := url.Parse("/posts")
 
@@ -95,6 +102,7 @@ func (s *PostCli) List(opts *PostListOptions) (*PostListResponse, *Response, err
 		return nil, nil, err
 	}
 
+	opts.SetDefaultSort()
 	q := u.Query()
 	q.Set("per_page", strconv.Itoa(opts.PerPage))
 	q.Set("page", strconv.Itoa(opts.Page))
@@ -107,18 +115,22 @@ func (s *PostCli) List(opts *PostListOptions) (*PostListResponse, *Response, err
 		return nil, nil, err
 	}
 
-	mResp := &PostListResponse{}
-	resp, err := s.client.Do(req, mResp)
+	posts := &PostListResponse{}
+	resp, err := s.client.Do(req, posts)
 
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return mResp, resp, err
+	resp.Total = posts.Meta.Total
+	resp.NextPage = posts.Meta.NextPage
+	resp.PreviousPage = posts.Meta.PreviousPage
+
+	return posts.Posts, resp, err
 }
 
 // Get Post
-func (s *PostCli) Get(postID int) (*Post, *Response, error) {
+func (s *postService) Get(postID int) (*Post, *Response, error) {
 
 	u, err := url.Parse(fmt.Sprintf("/posts/%d", postID))
 
@@ -132,18 +144,18 @@ func (s *PostCli) Get(postID int) (*Post, *Response, error) {
 		return nil, nil, err
 	}
 
-	mResp := &Post{}
-	resp, err := s.client.Do(req, mResp)
+	post := &Post{}
+	resp, err := s.client.Do(req, post)
 
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return mResp, resp, err
+	return post, resp, err
 }
 
 // Create Post
-func (s *PostCli) Create(memoReq *PostCreateRequest) (*Post, *Response, error) {
+func (s *postService) Create(memoReq *PostCreateRequest) (*Post, *Response, error) {
 	u, err := url.Parse("/posts")
 
 	if err != nil {
@@ -167,7 +179,7 @@ func (s *PostCli) Create(memoReq *PostCreateRequest) (*Post, *Response, error) {
 }
 
 // Update Post
-func (s *PostCli) Update(postID int, postUpdateRequest *PostUpdateRequest) (*Post, *Response, error) {
+func (s *postService) Update(postID int, postUpdateRequest *PostUpdateRequest) (*Post, *Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%d", postID))
 	if err != nil {
 		return nil, nil, err
@@ -193,7 +205,7 @@ func (s *PostCli) Update(postID int, postUpdateRequest *PostUpdateRequest) (*Pos
 }
 
 // Delete Post
-func (s *PostCli) Delete(postID string) (*Response, error) {
+func (s *postService) Delete(postID string) (*Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%s", postID))
 	if err != nil {
 		return nil, err
@@ -214,7 +226,7 @@ func (s *PostCli) Delete(postID string) (*Response, error) {
 }
 
 // Archive Post
-func (s *PostCli) Archive(postID int) (*Response, error) {
+func (s *postService) Archive(postID int) (*Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%d/archive", postID))
 	if err != nil {
 		return nil, err
@@ -239,7 +251,7 @@ func (s *PostCli) Archive(postID int) (*Response, error) {
 }
 
 // Unarchive Post
-func (s *PostCli) Unarchive(postID int) (*Response, error) {
+func (s *postService) Unarchive(postID int) (*Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/posts/%d/unarchive", postID))
 	if err != nil {
 		return nil, err

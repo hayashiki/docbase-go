@@ -16,8 +16,8 @@ type GroupService interface {
 	Create(createRequest *GroupCreateRequest) (*Group, *Response, error)
 }
 
-// GroupCli handles communication with API
-type GroupCli struct {
+// groupService handles communication with API
+type groupService struct {
 	client *Client
 }
 
@@ -54,7 +54,7 @@ type GroupCreateRequest struct {
 type GroupListResponse []SimpleGroup
 
 // List Group
-func (s *GroupCli) List(opts *GroupListOptions) (*GroupListResponse, *Response, error) {
+func (s *groupService) List(opts *GroupListOptions) (*GroupListResponse, *Response, error) {
 	u, err := url.Parse("/groups")
 
 	if err != nil {
@@ -84,7 +84,7 @@ func (s *GroupCli) List(opts *GroupListOptions) (*GroupListResponse, *Response, 
 }
 
 // Get Group
-func (s *GroupCli) Get(id int) (*Group, *Response, error) {
+func (s *groupService) Get(id int) (*Group, *Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/groups/%d", id))
 
 	if err != nil {
@@ -108,7 +108,7 @@ func (s *GroupCli) Get(id int) (*Group, *Response, error) {
 }
 
 // Create Group
-func (s *GroupCli) Create(createRequest *GroupCreateRequest) (*Group, *Response, error) {
+func (s *groupService) Create(createRequest *GroupCreateRequest) (*Group, *Response, error) {
 	u, err := url.Parse("/groups")
 
 	if err != nil {
