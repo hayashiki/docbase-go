@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -86,6 +87,12 @@ type PostListOptions struct {
 	PerPage int    `url:"per_page,omitempty"`
 }
 
+func (opts *PostListOptions) SetDefaultSort() {
+	if !strings.Contains(opts.Q, "desc:") {
+		opts.Q += "+desc:score"
+	}
+}
+
 // List Post
 func (s *postService) List(opts *PostListOptions) ([]*Post, *Response, error) {
 
@@ -95,6 +102,7 @@ func (s *postService) List(opts *PostListOptions) ([]*Post, *Response, error) {
 		return nil, nil, err
 	}
 
+	opts.SetDefaultSort()
 	q := u.Query()
 	q.Set("per_page", strconv.Itoa(opts.PerPage))
 	q.Set("page", strconv.Itoa(opts.Page))
@@ -107,18 +115,18 @@ func (s *postService) List(opts *PostListOptions) ([]*Post, *Response, error) {
 		return nil, nil, err
 	}
 
-	mResp := &PostListResponse{}
-	resp, err := s.client.Do(req, mResp)
+	posts := &PostListResponse{}
+	resp, err := s.client.Do(req, posts)
 
 	if err != nil {
 		return nil, nil, err
 	}
 
-	resp.Total = mResp.Meta.Total
-	resp.NextPage = mResp.Meta.NextPage
-	resp.PreviousPage = mResp.Meta.PreviousPage
+	resp.Total = posts.Meta.Total
+	resp.NextPage = posts.Meta.NextPage
+	resp.PreviousPage = posts.Meta.PreviousPage
 
-	return mResp.Posts, resp, err
+	return posts.Posts, resp, err
 }
 
 // Get Post
@@ -136,14 +144,14 @@ func (s *postService) Get(postID int) (*Post, *Response, error) {
 		return nil, nil, err
 	}
 
-	mResp := &Post{}
-	resp, err := s.client.Do(req, mResp)
+	post := &Post{}
+	resp, err := s.client.Do(req, post)
 
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return mResp, resp, err
+	return post, resp, err
 }
 
 // Create Post
