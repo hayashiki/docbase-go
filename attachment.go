@@ -63,6 +63,10 @@ func (f *File) Encode(filePath string) error {
 
 type FileContent []byte
 
+func (f FileContent) Write() []byte {
+	return f
+}
+
 func (s *attachmentService) Download(attachmentID string) (*FileContent, *Response, error) {
 	u, err := url.Parse(fmt.Sprintf("/attachments/%s", attachmentID))
 
