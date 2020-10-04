@@ -3,7 +3,6 @@ package docbase
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -50,7 +49,7 @@ type Client struct {
 	Attachments AttachmentService
 }
 
-// Response is http response wrapper for Dobase
+// Response is http response wrapper for DocBase
 type Response struct {
 	*http.Response
 	Rate
@@ -64,7 +63,7 @@ func newResponse(r *http.Response) *Response {
 }
 
 // NewClient returns client API
-func NewClient(httpClient *http.Client, team, token string, opts ...Option) *Client {
+func NewClient(httpClient *http.Client, team, token string) *Client {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
@@ -79,14 +78,7 @@ func NewClient(httpClient *http.Client, team, token string, opts ...Option) *Cli
 		AccessToken: token,
 		Team:        team,
 		Client:      httpClient,
-	}
-
-	for _, opt := range opts {
-		opt(cli)
-	}
-
-	if cli.BaseURL == nil {
-		cli.BaseURL = baseURL
+		BaseURL:     baseURL,
 	}
 
 	cli.Posts = &postService{cli}
@@ -98,14 +90,6 @@ func NewClient(httpClient *http.Client, team, token string, opts ...Option) *Cli
 	cli.GroupUsers = &groupUserService{cli}
 
 	return cli
-}
-
-type Option func(client *Client)
-
-func OptionDocBaseURL(url *url.URL) Option {
-	return func(client *Client) {
-		client.BaseURL = url
-	}
 }
 
 // NewRequest creates a API request with HTTP method, endpoint path and payload
@@ -203,7 +187,7 @@ func CheckResponse(r *http.Response) error {
 	if err == nil && data != nil {
 		err = json.Unmarshal(data, errorResponse)
 		if err != nil {
-			errorResponse.err = errors.New("Not JSON")
+			errorResponse.err = fmt.Errorf("not json structure")
 		}
 	}
 	switch r.StatusCode {
