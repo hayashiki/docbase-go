@@ -89,7 +89,7 @@ type PostListOptions struct {
 
 func (opts *PostListOptions) SetDefaultSort() {
 	if !strings.Contains(opts.Q, "desc:") {
-		opts.Q += "+desc:score"
+		opts.Q += " desc:score"
 	}
 }
 
