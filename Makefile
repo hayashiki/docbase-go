@@ -15,4 +15,4 @@ tag:
 
 .PHONY: release
 release: tag
-	git push origin master
+	git push origin main
